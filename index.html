@@ -2218,7 +2218,7 @@
               ? "대현자 상태 — 현재 데미지 0"
               : g === MAX_STATE
                 ? "정신분열 상태 — 누적 데미지 MAX"
-                : "현재 비공부 상태 — 멘탈 도트 데미지 적용 중";
+                : "현재 비공부 상태 — 멘탈 데미지 적용 중";
           $("goalBtnHours").textContent = `${goalHours}시간`;
           const restHours = 24 - goalHours;
           const ratio = goalHours >= 24 ? 0 : restHours / goalHours;
