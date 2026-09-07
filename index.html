@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StudyLog</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <title>Menhera's StudyLog</title>
+    <link rel="icon" type="image/png" href="assets/ui/book.png" />
     <style>
       :root {
         --paper: #f7f5ef;
@@ -452,6 +452,68 @@
         filter: grayscale(0.08);
         transition: 0.25s transform;
       }
+
+      /* ===== Mental grade artwork ===== */
+      .portrait .face {
+        width: 156px;
+        height: 156px;
+        display: grid;
+        place-items: center;
+        transition: 0.25s transform;
+      }
+
+      .mental-grade-img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .mental-grade-img.main {
+        width: 156px;
+        height: 156px;
+      }
+
+      .grade-image-inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .mental-grade-img.mini {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+      }
+
+      .mental-grade-img.offline-main {
+        width: 76px;
+        height: 76px;
+      }
+
+      .mental-grade-img.offline-badge {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+      }
+
+      .effect-grade-img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+        flex: 0 0 20px;
+      }
+
+      @media (max-width: 950px) {
+        .portrait .face,
+        .mental-grade-img.main {
+          width: 112px;
+          height: 112px;
+        }
+      }
+
       .grade {
         font-size: 42px;
         font-weight: 900;
@@ -463,6 +525,20 @@
         line-height: 1.65;
         max-width: 250px;
       }
+
+      /* ===== Mental state text spacing ===== */
+      #grade {
+        margin-bottom: 8px;
+      }
+
+      #range {
+        margin-bottom: 10px;
+      }
+
+      #gradeDesc {
+        margin-top: 0;
+      }
+
       .range {
         font-family: "Courier New", monospace;
         font-size: 11px;
@@ -493,19 +569,86 @@
       }
 
       .single-tab-overlay {
-        position: fixed; inset: 0; z-index: 99999; display: none; place-items: center; padding: 22px;
-        background: linear-gradient(rgba(247,245,239,.88),rgba(247,245,239,.94)), repeating-linear-gradient(0deg,rgba(80,70,55,.025) 0 1px,transparent 1px 4px);
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: none;
+        place-items: center;
+        padding: 22px;
+        background:
+          linear-gradient(rgba(247, 245, 239, 0.88), rgba(247, 245, 239, 0.94)),
+          repeating-linear-gradient(
+            0deg,
+            rgba(80, 70, 55, 0.025) 0 1px,
+            transparent 1px 4px
+          );
         backdrop-filter: blur(7px);
       }
-      .single-tab-overlay.show { display: grid; }
-      .single-tab-card { width:min(560px,calc(100vw - 32px)); padding:28px; text-align:center; background:#fffdf8; border:1.5px solid var(--line-dark); border-radius:12px; box-shadow:0 18px 50px rgba(64,58,48,.14); position:relative; }
-      .single-tab-card::after { content:""; position:absolute; inset:7px; border:1px dashed rgba(95,88,74,.2); border-radius:8px; pointer-events:none; }
-      .single-tab-icon { font-size:44px; margin-bottom:10px; }
-      .single-tab-card h2 { margin:0 0 10px; font-size:28px; }
-      .single-tab-card p { margin:0; color:#686159; line-height:1.75; font-size:15px; }
-      .single-tab-note { margin-top:16px; padding:11px 12px; border-left:4px solid #bda977; border-radius:8px; background:#faf5e9; color:#675f51; font-family:"Noto Sans KR",sans-serif; font-size:12px; line-height:1.65; }
-      .single-tab-actions { margin-top:18px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; position:relative; z-index:1; }
-      .single-tab-actions button { border:1.3px solid #8e887e; background:#fffdf8; color:#2f2d29; border-radius:6px; padding:10px 14px; font-weight:900; cursor:pointer; box-shadow:2px 2px 0 rgba(80,75,65,.12); }
+      .single-tab-overlay.show {
+        display: grid;
+      }
+      .single-tab-card {
+        width: min(560px, calc(100vw - 32px));
+        padding: 28px;
+        text-align: center;
+        background: #fffdf8;
+        border: 1.5px solid var(--line-dark);
+        border-radius: 12px;
+        box-shadow: 0 18px 50px rgba(64, 58, 48, 0.14);
+        position: relative;
+      }
+      .single-tab-card::after {
+        content: "";
+        position: absolute;
+        inset: 7px;
+        border: 1px dashed rgba(95, 88, 74, 0.2);
+        border-radius: 8px;
+        pointer-events: none;
+      }
+      .single-tab-icon {
+        font-size: 44px;
+        margin-bottom: 10px;
+      }
+      .single-tab-card h2 {
+        margin: 0 0 10px;
+        font-size: 28px;
+      }
+      .single-tab-card p {
+        margin: 0;
+        color: #686159;
+        line-height: 1.75;
+        font-size: 15px;
+      }
+      .single-tab-note {
+        margin-top: 16px;
+        padding: 11px 12px;
+        border-left: 4px solid #bda977;
+        border-radius: 8px;
+        background: #faf5e9;
+        color: #675f51;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 12px;
+        line-height: 1.65;
+      }
+      .single-tab-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+      }
+      .single-tab-actions button {
+        border: 1.3px solid #8e887e;
+        background: #fffdf8;
+        color: #2f2d29;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 rgba(80, 75, 65, 0.12);
+      }
 
       dialog {
         padding: 0;
@@ -1360,9 +1503,472 @@
           transform: rotate(90deg);
         }
       }
+
+      /* ===== Top-right utility menu ===== */
+      .utility-menu-wrap {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 95;
+        font-family: "Noto Sans KR", sans-serif;
+      }
+
+      .utility-menu-toggle {
+        width: 44px;
+        height: 44px;
+        border: 1.4px solid #8e887e;
+        border-radius: 10px;
+        background: rgba(255, 253, 248, 0.96);
+        color: #35312d;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 rgba(80, 75, 65, 0.12);
+        font-size: 22px;
+        font-weight: 900;
+        display: grid;
+        place-items: center;
+        transition: 0.15s;
+      }
+
+      .utility-menu-toggle:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 rgba(80, 75, 65, 0.13);
+      }
+
+      .utility-menu-panel {
+        position: absolute;
+        top: 52px;
+        right: 0;
+        width: 210px;
+        display: none;
+        padding: 9px;
+        border: 1.5px solid var(--line-dark);
+        border-radius: 12px;
+        background: rgba(255, 253, 248, 0.98);
+        box-shadow: 0 14px 34px rgba(64, 58, 48, 0.14);
+      }
+
+      .utility-menu-panel.open {
+        display: block;
+      }
+
+      .utility-menu-panel::after {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border: 1px dashed rgba(95, 88, 74, 0.18);
+        border-radius: 8px;
+        pointer-events: none;
+      }
+
+      .utility-menu-title {
+        position: relative;
+        z-index: 1;
+        padding: 5px 8px 8px;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        color: #817b72;
+      }
+
+      .utility-menu-item {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: #37332f;
+        padding: 10px 11px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+        cursor: pointer;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .utility-menu-item:hover {
+        background: #f5f0e7;
+        border-color: #d2cabd;
+      }
+
+      .utility-menu-icon {
+        width: 24px;
+        text-align: center;
+        font-size: 17px;
+      }
+
+      @media (max-width: 580px) {
+        .utility-menu-wrap {
+          top: 10px;
+          right: 10px;
+        }
+
+        .utility-menu-toggle {
+          width: 42px;
+          height: 42px;
+        }
+
+        .utility-menu-panel {
+          width: min(220px, calc(100vw - 20px));
+        }
+      }
+
+      /* ===== Help dialog ===== */
+      .help-dialog {
+        width: min(760px, calc(100vw - 32px));
+        max-height: 86vh;
+      }
+
+      .help-body {
+        padding: 26px 30px 30px;
+        overflow-y: auto;
+        max-height: calc(86vh - 82px);
+      }
+
+      .help-lead {
+        margin: 0 0 20px;
+        padding: 15px 17px;
+        border-left: 4px solid #8ca594;
+        border-radius: 8px;
+        background: #f4f8f2;
+        color: #565c55;
+        font-size: 15px;
+        line-height: 1.75;
+      }
+
+      .help-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .help-card {
+        position: relative;
+        padding: 16px 17px;
+        border: 1px solid #c4bcaf;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.68);
+        min-height: 124px;
+      }
+
+      .help-card::after {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border: 1px dashed rgba(116, 105, 87, 0.14);
+        border-radius: 7px;
+        pointer-events: none;
+      }
+
+      .help-card h3 {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 8px;
+        font-size: 17px;
+      }
+
+      .help-card p {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        color: #686158;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .help-card b {
+        color: #39352f;
+      }
+
+      .help-data-note {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border: 1px dashed #bdb5a8;
+        border-radius: 9px;
+        background: #faf6ee;
+        color: #665f56;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 12px;
+        line-height: 1.75;
+      }
+
+      @media (max-width: 680px) {
+        .help-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .help-body {
+          padding: 20px 18px 22px;
+        }
+      }
+
+      @media (max-width: 580px) {
+        .help-dialog {
+          width: calc(100vw - 16px);
+          max-height: 92vh;
+        }
+
+        .help-body {
+          max-height: calc(92vh - 78px);
+          padding: 18px 14px 20px;
+        }
+      }
+
+      /* ===== Share card ===== */
+      .share-dialog {
+        width: min(720px, calc(100vw - 28px));
+        max-height: 92vh;
+      }
+
+      .share-body {
+        padding: 20px 22px 24px;
+        overflow-y: auto;
+        max-height: calc(92vh - 78px);
+      }
+
+      .share-intro {
+        margin: 0 0 14px;
+        color: #686158;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .share-preview-shell {
+        width: min(100%, 500px);
+        margin: 0 auto;
+        padding: 10px;
+        border: 1.3px solid #b7afa3;
+        border-radius: 14px;
+        background: #efe9df;
+        box-shadow: 0 10px 25px rgba(68, 60, 48, 0.08);
+      }
+
+      #shareCanvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+        border-radius: 9px;
+        background: #fffdf8;
+      }
+
+      .share-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+
+      .share-action-btn {
+        border: 1.3px solid #8e887e;
+        background: #fffdf8;
+        color: #2f2d29;
+        border-radius: 7px;
+        padding: 11px 15px;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 13px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 rgba(80, 75, 65, 0.12);
+      }
+
+      .share-action-btn.primary-share {
+        border-color: #5f8067;
+        background: #eef6ef;
+        color: #27432f;
+      }
+
+      .share-action-btn:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 rgba(80, 75, 65, 0.13);
+      }
+
+      .share-note {
+        min-height: 20px;
+        margin-top: 10px;
+        text-align: center;
+        color: #777168;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 580px) {
+        .share-dialog {
+          width: calc(100vw - 16px);
+        }
+
+        .share-body {
+          padding: 16px 14px 20px;
+        }
+      }
+
+      /* ===== Watercolor UI image icons ===== */
+      .ui-icon {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .menu-toggle-icon {
+        width: 29px;
+        height: 29px;
+      }
+
+      .utility-menu-icon {
+        width: 28px;
+        height: 28px;
+        display: inline-grid;
+        place-items: center;
+        flex: 0 0 28px;
+      }
+
+      .utility-menu-icon .ui-icon {
+        width: 27px;
+        height: 27px;
+      }
+
+      .wallet-coin {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .wallet-coin-img {
+        width: 24px;
+        height: 24px;
+      }
+
+      .shop-open {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .button-icon {
+        width: 22px;
+        height: 22px;
+        flex: 0 0 22px;
+      }
+
+      .shop-wallet-big .coin {
+        width: 31px;
+        height: 31px;
+        display: inline-grid;
+        place-items: center;
+      }
+
+      .shop-coin-img {
+        width: 31px;
+        height: 31px;
+      }
+
+      .shop-item-icon-img {
+        width: 52px;
+        height: 52px;
+      }
+
+      .offline-initial-icon {
+        width: 66px;
+        height: 66px;
+      }
+
+      .help-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .help-title-icon {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+      }
+
+      .single-tab-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 10px;
+        display: grid;
+        place-items: center;
+      }
+
+      .single-tab-book-icon {
+        width: 62px;
+        height: 62px;
+      }
+
+      .effect-ui-icon {
+        width: 22px;
+        height: 22px;
+        flex: 0 0 22px;
+      }
+
+      .inline-icon-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .inline-ui-icon {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        vertical-align: middle;
+      }
     </style>
   </head>
   <body>
+    <div class="utility-menu-wrap">
+      <button
+        id="utilityMenuToggle"
+        class="utility-menu-toggle"
+        type="button"
+        aria-label="메뉴 열기"
+        aria-expanded="false"
+      >
+        <img src="assets/ui/menu.png" alt="" class="ui-icon menu-toggle-icon" />
+      </button>
+
+      <div id="utilityMenuPanel" class="utility-menu-panel" role="menu">
+        <div class="utility-menu-title">MENHERA'S STUDYLOG MENU</div>
+        <button
+          id="shareOpen"
+          class="utility-menu-item"
+          type="button"
+          role="menuitem"
+        >
+          <span class="utility-menu-icon"
+            ><img src="assets/ui/share.png" alt="" class="ui-icon"
+          /></span>
+          <span>현재 상태 공유</span>
+        </button>
+        <button
+          id="helpOpen"
+          class="utility-menu-item"
+          type="button"
+          role="menuitem"
+        >
+          <span class="utility-menu-icon"
+            ><img src="assets/ui/help.png" alt="" class="ui-icon"
+          /></span>
+          <span>도움말</span>
+        </button>
+      </div>
+    </div>
+
     <div class="app">
       <section class="boss-wrap">
         <div class="boss-meta">
@@ -1378,12 +1984,21 @@
           <div class="wallet-zone">
             <div>
               <div class="wallet-pill">
-                <span class="wallet-coin">G</span
+                <span class="wallet-coin"
+                  ><img
+                    src="assets/ui/coin.png"
+                    alt=""
+                    class="ui-icon wallet-coin-img" /></span
                 ><span id="goldValue">0</span> G
               </div>
-              <div id="goldRateTop" class="wallet-rate">+0.000 G / sec</div>
             </div>
-            <button id="shopOpen" class="shop-open">상점</button>
+            <button id="shopOpen" class="shop-open">
+              <img
+                src="assets/ui/shop.png"
+                alt=""
+                class="ui-icon button-icon"
+              />상점
+            </button>
           </div>
         </div>
         <div class="bar-shell">
@@ -1429,7 +2044,7 @@
           <div class="panel-header">Mental State</div>
           <div class="mental-card">
             <div id="portrait" class="portrait">
-              <div id="face" class="face">😌</div>
+              <div id="face" class="face" aria-hidden="true"></div>
             </div>
             <div>
               <div id="grade" class="grade">평온</div>
@@ -1495,7 +2110,12 @@
           <div class="shop-wallet-card">
             <div class="shop-card-kicker">My Wallet</div>
             <div class="shop-wallet-big">
-              <span class="coin">🪙</span><span id="shopGoldValue">0</span> G
+              <span class="coin"
+                ><img
+                  src="assets/ui/coin.png"
+                  alt=""
+                  class="ui-icon shop-coin-img" /></span
+              ><span id="shopGoldValue">0</span> G
             </div>
             <div class="shop-rate-line">
               공부 중일 때 벌 수 있는 재화. 획득한 골드로 유용한 아이템을 구매할
@@ -1690,7 +2310,13 @@
       </div>
       <div class="offline-body">
         <div class="offline-hero">
-          <div id="offlineFace" class="offline-face">⏳</div>
+          <div id="offlineFace" class="offline-face">
+            <img
+              src="assets/ui/offline.png"
+              alt=""
+              class="ui-icon offline-initial-icon"
+            />
+          </div>
           <div>
             <div class="offline-title">
               공부하지 않은 시간이 정산되었습니다.
@@ -1717,8 +2343,6 @@
           </div>
         </div>
 
-        <div id="offlineGradeChange" class="offline-grade"></div>
-
         <div class="offline-total-wrap">
           <div class="offline-total-head">
             <div class="offline-total-label">Damage Gauge After Settlement</div>
@@ -1742,13 +2366,162 @@
       </div>
     </dialog>
 
+    <dialog id="shareModal" class="share-dialog">
+      <div class="modal-head">
+        <div>
+          <div class="boss-title" style="margin-bottom: 5px">
+            SHARE MY STATUS
+          </div>
+          <h2>현재 상태 공유</h2>
+        </div>
+        <button class="close" id="closeShare">닫기</button>
+      </div>
+      <div class="share-body">
+        <p class="share-intro">
+          현재 순공시간과 멘탈 상태를 1080×1080 이미지 카드로 만들었어.
+          모바일에서는 바로 공유할 수 있고, PC에서는 이미지로 저장할 수도 있어.
+        </p>
+        <div class="share-preview-shell">
+          <canvas
+            id="shareCanvas"
+            width="1080"
+            height="1080"
+            aria-label="Menhera's StudyLog 현재 상태 공유 카드"
+          ></canvas>
+        </div>
+        <div class="share-actions">
+          <button
+            id="shareNativeBtn"
+            class="share-action-btn primary-share"
+            type="button"
+          >
+            공유하기
+          </button>
+          <button id="shareDownloadBtn" class="share-action-btn" type="button">
+            이미지 저장
+          </button>
+        </div>
+        <div id="shareNote" class="share-note"></div>
+      </div>
+    </dialog>
+
+    <dialog id="helpModal" class="help-dialog">
+      <div class="modal-head">
+        <div>
+          <div class="boss-title" style="margin-bottom: 5px">QUICK GUIDE</div>
+          <h2>Menhera's StudyLog 도움말</h2>
+        </div>
+        <button class="close" id="closeHelp">닫기</button>
+      </div>
+      <div class="help-body">
+        <p class="help-lead">
+          <b>공부하지 않으면 멘탈 데미지가 쌓이고, 공부하면 회복됩니다.</b>
+          순공 타이머와 멘탈 관리 게임을 함께 굴린다고 생각하면 돼.
+        </p>
+
+        <div class="help-grid">
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/timer.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />순공 시작 / 종료
+            </h3>
+            <p>
+              <b>공부 시작</b>을 누른 동안만 순공 시간이 기록돼. 공부 중에는
+              멘탈 데미지가 회복되고 골드를 얻을 수 있어.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/damage.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />멘탈 데미지
+            </h3>
+            <p>
+              비공부 상태에서는 데미지가 계속 증가해. 누적 데미지에 따라 멘탈
+              등급이 변하며, 공부해서 다시 낮출 수 있어.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/target.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />일일 순공 목표
+            </h3>
+            <p>
+              목표시간에 맞춰 <b>공부 중 회복 속도</b>가 자동 조정돼. 예를 들어
+              4시간 목표는 하루 20시간의 비공부 데미지를 4시간 공부로 상쇄하는
+              밸런스야.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/coin.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />골드 & 상점
+            </h3>
+            <p>
+              골드는 <b>공부 중에만</b> 획득해. 멘탈 상태에 따라 획득 속도가
+              달라지고, 모은 골드는 상점 아이템 구매에 사용할 수 있어.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/offline.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />접속하지 않은 시간
+            </h3>
+            <p>
+              페이지를 닫거나 다시 접속하면 공부 모드는 종료돼. 마지막 저장 이후
+              경과시간은 비공부 시간으로 계산되어 <b>방치 데미지</b>가 정산돼.
+            </p>
+          </section>
+        </div>
+
+        <div class="help-data-note">
+          <b>데이터 안내</b> · 기록은 현재 브라우저의 localStorage에 저장돼.
+          다른 기기·다른 브라우저와 자동 동기화되지 않으며, 시크릿 모드나 사이트
+          데이터 삭제 시 기록이 사라질 수 있어. 데이터 충돌 방지를 위해 같은
+          브라우저에서는 Menhera's StudyLog를 한 탭에서만 실행해.
+        </div>
+      </div>
+    </dialog>
+
     <div id="singleTabOverlay" class="single-tab-overlay" aria-live="polite">
       <div class="single-tab-card">
-        <div class="single-tab-icon">📚</div>
-        <h2>StudyLog가 다른 탭에서 실행 중이야</h2>
-        <p>순공시간, 데미지, 골드가 서로 덮어쓰이는 것을 막기 위해 한 번에 하나의 탭만 메인 실행권을 가질 수 있어.</p>
-        <div class="single-tab-note">기존 StudyLog 탭을 닫으면 이 화면이 자동으로 해제돼. 비정상 종료된 경우에도 잠시 후 실행권을 다시 확인해.</div>
-        <div class="single-tab-actions"><button id="singleTabCheckBtn" type="button">다시 확인</button></div>
+        <div class="single-tab-icon">
+          <img
+            src="assets/ui/book.png"
+            alt=""
+            class="ui-icon single-tab-book-icon"
+          />
+        </div>
+        <h2>Menhera's StudyLog가 다른 탭에서 실행 중이야</h2>
+        <p>
+          순공시간, 데미지, 골드가 서로 덮어쓰이는 것을 막기 위해 한 번에 하나의
+          탭만 메인 실행권을 가질 수 있어.
+        </p>
+        <div class="single-tab-note">
+          기존 Menhera's StudyLog 탭을 닫으면 이 화면이 자동으로 해제돼. 비정상
+          종료된 경우에도 잠시 후 실행권을 다시 확인해.
+        </div>
+        <div class="single-tab-actions">
+          <button id="singleTabCheckBtn" type="button">다시 확인</button>
+        </div>
       </div>
     </div>
 
@@ -1778,16 +2551,28 @@
         }
 
         function readTabLock() {
-          try { return JSON.parse(localStorage.getItem(TAB_LOCK_KEY) || "null"); } catch { return null; }
+          try {
+            return JSON.parse(localStorage.getItem(TAB_LOCK_KEY) || "null");
+          } catch {
+            return null;
+          }
         }
         function lockIsFresh(lock, now = Date.now()) {
-          return !!(lock && lock.id && Number.isFinite(Number(lock.ts)) && now - Number(lock.ts) < TAB_LOCK_TTL);
+          return !!(
+            lock &&
+            lock.id &&
+            Number.isFinite(Number(lock.ts)) &&
+            now - Number(lock.ts) < TAB_LOCK_TTL
+          );
         }
         function tryAcquireTabLock() {
           const now = Date.now();
           const current = readTabLock();
           if (lockIsFresh(current, now) && current.id !== tabId) return false;
-          localStorage.setItem(TAB_LOCK_KEY, JSON.stringify({ id: tabId, ts: now }));
+          localStorage.setItem(
+            TAB_LOCK_KEY,
+            JSON.stringify({ id: tabId, ts: now }),
+          );
           const verified = readTabLock();
           return !!(verified && verified.id === tabId);
         }
@@ -1804,7 +2589,9 @@
           };
           const button = document.getElementById("singleTabCheckBtn");
           if (button) button.addEventListener("click", recheck);
-          window.addEventListener("storage", (event) => { if (event.key === TAB_LOCK_KEY) recheck(); });
+          window.addEventListener("storage", (event) => {
+            if (event.key === TAB_LOCK_KEY) recheck();
+          });
           setInterval(recheck, 2500);
         }
         if (!tryAcquireTabLock()) {
@@ -1855,6 +2642,327 @@
         }
 
         const $ = (id) => document.getElementById(id);
+
+        // 우측 상단 유틸리티 메뉴 / 도움말
+        const utilityMenuToggle = $("utilityMenuToggle");
+        const utilityMenuPanel = $("utilityMenuPanel");
+
+        function setUtilityMenu(open) {
+          utilityMenuPanel.classList.toggle("open", open);
+          utilityMenuToggle.setAttribute("aria-expanded", String(open));
+        }
+
+        utilityMenuToggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setUtilityMenu(!utilityMenuPanel.classList.contains("open"));
+        });
+
+        utilityMenuPanel.addEventListener("click", (e) => e.stopPropagation());
+        document.addEventListener("click", () => setUtilityMenu(false));
+
+        $("helpOpen").addEventListener("click", () => {
+          setUtilityMenu(false);
+          $("helpModal").showModal();
+        });
+
+        $("closeHelp").addEventListener("click", () => $("helpModal").close());
+        $("helpModal").addEventListener("click", (e) => {
+          if (e.target === $("helpModal")) $("helpModal").close();
+        });
+
+        // 현재 상태 공유 카드
+        const SHARE_SITE_URL = "https://mental.study-log.kro.kr";
+
+        function shareStatusLine(grade) {
+          const lines = {
+            대현자: "오늘은 내가 신이다.",
+            평온: "아직은 멀쩡하다.",
+            동요: "슬슬 공부가 신경 쓰이기 시작했다.",
+            균열: "멘탈에 금이 가는 중.",
+            붕괴: "인간성이 무너지는 중.",
+            멘헤라: "돌아갈 수 있을까.",
+            정신분열: "멘탈 게이지가 끝까지 와버렸다.",
+          };
+          return lines[grade.name] || "오늘의 멘탈을 기록하는 중.";
+        }
+
+        function shareCanvasBlob() {
+          return new Promise((resolve, reject) => {
+            const canvas = $("shareCanvas");
+            canvas.toBlob(
+              (blob) =>
+                blob ? resolve(blob) : reject(new Error("이미지 생성 실패")),
+              "image/png",
+              0.95,
+            );
+          });
+        }
+
+        function roundedRect(ctx, x, y, w, h, r) {
+          const radius = Math.min(r, w / 2, h / 2);
+          ctx.beginPath();
+          ctx.moveTo(x + radius, y);
+          ctx.arcTo(x + w, y, x + w, y + h, radius);
+          ctx.arcTo(x + w, y + h, x, y + h, radius);
+          ctx.arcTo(x, y + h, x, y, radius);
+          ctx.arcTo(x, y, x + w, y, radius);
+          ctx.closePath();
+        }
+
+        async function drawShareCard() {
+          const canvas = $("shareCanvas");
+          const ctx = canvas.getContext("2d");
+          const g = currentGrade();
+          const W = canvas.width;
+          const H = canvas.height;
+          const dmg = Math.max(0, Math.min(MAX_DAMAGE, damage));
+          const pct = dmg / MAX_DAMAGE;
+          const pad = 72;
+
+          // Paper background
+          ctx.clearRect(0, 0, W, H);
+          ctx.fillStyle = "#f7f5ef";
+          ctx.fillRect(0, 0, W, H);
+
+          ctx.strokeStyle = "rgba(80, 120, 180, 0.075)";
+          ctx.lineWidth = 1;
+          for (let p = 28; p < W; p += 28) {
+            ctx.beginPath();
+            ctx.moveTo(p, 0);
+            ctx.lineTo(p, H);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, p);
+            ctx.lineTo(W, p);
+            ctx.stroke();
+          }
+
+          // Outer card
+          ctx.fillStyle = "rgba(255,253,248,0.97)";
+          ctx.strokeStyle = "#9c978d";
+          ctx.lineWidth = 3;
+          roundedRect(ctx, 38, 38, W - 76, H - 76, 26);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.save();
+          ctx.setLineDash([9, 9]);
+          ctx.strokeStyle = "rgba(95,88,74,0.28)";
+          ctx.lineWidth = 2;
+          roundedRect(ctx, 52, 52, W - 104, H - 104, 20);
+          ctx.stroke();
+          ctx.restore();
+
+          // Header
+          ctx.fillStyle = "#716c64";
+          ctx.font = '900 28px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText("MENHERA'S STUDYLOG · MENTAL STATUS", pad, 118);
+
+          ctx.fillStyle = "#242424";
+          ctx.font = '900 68px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText("오늘의 생존 기록", pad, 192);
+
+          // Mental badge
+          ctx.fillStyle = g.color + "22";
+          ctx.strokeStyle = g.color;
+          ctx.lineWidth = 3;
+          roundedRect(ctx, pad, 238, W - pad * 2, 174, 28);
+          ctx.fill();
+          ctx.stroke();
+
+          const shareIcon = await loadGradeImage(g);
+          ctx.drawImage(shareIcon, pad + 18, 248, 108, 108);
+
+          ctx.fillStyle = g.color;
+          ctx.font = '900 61px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText(g.name, pad + 150, 315);
+
+          ctx.fillStyle = "#615b53";
+          ctx.font = '700 29px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText(shareStatusLine(g), pad + 150, 363);
+
+          // Damage
+          ctx.fillStyle = "#777168";
+          ctx.font = '900 25px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText("MENTAL DAMAGE", pad, 476);
+
+          ctx.fillStyle = "#242424";
+          ctx.font = '900 57px "Courier New", monospace';
+          ctx.fillText(
+            `${Math.round(dmg).toLocaleString("ko-KR")} / ${MAX_DAMAGE.toLocaleString("ko-KR")}`,
+            pad,
+            538,
+          );
+
+          // Damage bar
+          const barX = pad;
+          const barY = 570;
+          const barW = W - pad * 2;
+          const barH = 42;
+          ctx.fillStyle = "#eee9df";
+          ctx.strokeStyle = "#8d887f";
+          ctx.lineWidth = 3;
+          roundedRect(ctx, barX, barY, barW, barH, 10);
+          ctx.fill();
+          ctx.stroke();
+
+          if (pct > 0) {
+            ctx.fillStyle = g.color;
+            roundedRect(
+              ctx,
+              barX + 5,
+              barY + 5,
+              Math.max(8, (barW - 10) * pct),
+              barH - 10,
+              7,
+            );
+            ctx.fill();
+          }
+
+          ctx.fillStyle = "#504b44";
+          ctx.font = '900 24px "Courier New", monospace';
+          ctx.textAlign = "right";
+          ctx.fillText(`${(pct * 100).toFixed(1)}%`, W - pad, barY + 77);
+          ctx.textAlign = "left";
+
+          // Stats cards
+          const gap = 22;
+          const statW = (barW - gap) / 2;
+          const statY = 682;
+          const statH = 180;
+
+          const drawStat = (x, label, value, sub) => {
+            ctx.fillStyle = "#fffdf8";
+            ctx.strokeStyle = "#bdb6aa";
+            ctx.lineWidth = 2;
+            roundedRect(ctx, x, statY, statW, statH, 20);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#7b756d";
+            ctx.font = '900 24px "Noto Sans KR", Arial, sans-serif';
+            ctx.fillText(label, x + 26, statY + 45);
+
+            ctx.fillStyle = "#242424";
+            ctx.font = '900 47px "Courier New", monospace';
+            ctx.fillText(value, x + 26, statY + 105);
+
+            if (sub) {
+              ctx.fillStyle = "#777168";
+              ctx.font = '700 22px "Noto Sans KR", Arial, sans-serif';
+              ctx.fillText(sub, x + 26, statY + 145);
+            }
+          };
+
+          drawStat(pad, "오늘 순공", fmt(todaySeconds), "");
+          drawStat(pad + statW + gap, "일일 목표", `${goalHours}시간`, "");
+
+          // Footer
+          ctx.strokeStyle = "#cbc4b9";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(pad, 914);
+          ctx.lineTo(W - pad, 914);
+          ctx.stroke();
+
+          ctx.fillStyle = "#4f4a44";
+          ctx.font = '900 29px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText("멘탈 데미지와 싸우는 순공 타이머", pad, 965);
+
+          ctx.fillStyle = "#777168";
+          ctx.font = '700 24px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText(SHARE_SITE_URL.replace("https://", ""), pad, 1008);
+
+          ctx.textAlign = "right";
+          ctx.fillStyle = "#8a857d";
+          ctx.font = '700 21px "Noto Sans KR", Arial, sans-serif';
+          ctx.fillText(new Date().toLocaleDateString("ko-KR"), W - pad, 1008);
+          ctx.textAlign = "left";
+        }
+
+        async function openShareModal() {
+          setUtilityMenu(false);
+          await drawShareCard();
+          $("shareNote").textContent = "";
+          $("shareModal").showModal();
+        }
+
+        $("shareOpen").addEventListener("click", () => {
+          openShareModal();
+        });
+        $("closeShare").addEventListener("click", () =>
+          $("shareModal").close(),
+        );
+        $("shareModal").addEventListener("click", (e) => {
+          if (e.target === $("shareModal")) $("shareModal").close();
+        });
+
+        $("shareDownloadBtn").addEventListener("click", async () => {
+          try {
+            await drawShareCard();
+            const blob = await shareCanvasBlob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `MenherasStudyLog_${currentGrade().name}_${new Date()
+              .toISOString()
+              .slice(0, 10)}.png`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            $("shareNote").textContent = "공유 카드 이미지를 저장했어.";
+          } catch (err) {
+            $("shareNote").textContent =
+              "이미지 저장에 실패했어. 다시 시도해줘.";
+          }
+        });
+
+        $("shareNativeBtn").addEventListener("click", async () => {
+          try {
+            await drawShareCard();
+            const blob = await shareCanvasBlob();
+            const g = currentGrade();
+            const file = new File([blob], "MenherasStudyLog-status.png", {
+              type: "image/png",
+            });
+            const shareText = `공부 안 하면 멘탈이 박살나는 타이머 쓰는 중\n현재 상태: ${g.name}\n오늘 순공: ${fmt(todaySeconds)}\n${SHARE_SITE_URL}`;
+
+            if (
+              navigator.share &&
+              navigator.canShare &&
+              navigator.canShare({ files: [file] })
+            ) {
+              await navigator.share({
+                title: "Menhera's StudyLog 현재 상태",
+                text: shareText,
+                files: [file],
+              });
+              $("shareNote").textContent = "공유 완료!";
+              return;
+            }
+
+            if (navigator.share) {
+              await navigator.share({
+                title: "Menhera's StudyLog 현재 상태",
+                text: shareText,
+                url: SHARE_SITE_URL,
+              });
+              $("shareNote").textContent =
+                "이 브라우저는 이미지 공유를 지원하지 않아 링크와 상태 문구를 공유했어.";
+              return;
+            }
+
+            $("shareDownloadBtn").click();
+            $("shareNote").textContent =
+              "이 브라우저는 시스템 공유를 지원하지 않아 이미지를 저장했어.";
+          } catch (err) {
+            if (err && err.name === "AbortError") return;
+            $("shareNote").textContent =
+              "공유 기능을 사용할 수 없어. 이미지 저장 버튼을 이용해줘.";
+          }
+        });
+
         const timerEl = $("timer"),
           damageEl = $("damageValue"),
           rateEl = $("rate"),
@@ -1871,45 +2979,45 @@
         const grades = [
           {
             name: "평온",
+            image: "assets/mental/calm.png",
             min: 0,
             max: 9999,
-            emoji: "😌",
             color: "#70e6bd",
             goldRate: 0.08,
             desc: "아직 머릿속이 조용하다. 공부를 안 해도 죄책감이 직접 공격해오지는 않는 상태.",
           },
           {
             name: "동요",
+            image: "assets/mental/uneasy.png",
             min: 10000,
             max: 29999,
-            emoji: "😐",
             color: "#e3d76d",
             goldRate: 0.05,
             desc: "해야 할 일이 은근히 신경 쓰인다. 쉬고 있어도 머릿속 한구석에서 미세한 경고음이 울린다.",
           },
           {
             name: "균열",
+            image: "assets/mental/crack.png",
             min: 30000,
             max: 54999,
-            emoji: "😵‍💫",
             color: "#ffad61",
             goldRate: 0.03,
             desc: "집중하지 못한 시간이 체감되기 시작한다. 공부 생각이 반복적으로 침투하고 멘탈에 금이 간다.",
           },
           {
             name: "붕괴",
+            image: "assets/mental/collapse.png",
             min: 55000,
             max: 79999,
-            emoji: "😫",
             color: "#ff657c",
             goldRate: 0.015,
             desc: "쉬는 시간에도 마음이 편하지 않다. 순공 시간을 확보하지 않으면 죄의식이 온몸을 옥죄어 올 것 같다.",
           },
           {
             name: "멘헤라",
+            image: "assets/mental/menhera.png",
             min: 80000,
             max: 100000,
-            emoji: "🫠",
             color: "#c175ff",
             goldRate: 0.005,
             desc: "누적 데미지 최상위 구간. 나는 사람이 아닌 짐승이다.",
@@ -1918,9 +3026,9 @@
 
         const SAGE_STATE = {
           name: "대현자",
+          image: "assets/mental/sage.png",
           min: 0,
           max: 0,
-          emoji: "🧘",
           color: "#8a74c7",
           goldRate: grades[0].goldRate * 1.3,
           desc: "나는 신이다. 공부 중 골드 획득량이 30% 증가한다.",
@@ -1928,19 +3036,54 @@
 
         const MAX_STATE = {
           name: "정신분열",
+          image: "assets/mental/max.png",
           min: MAX_DAMAGE,
           max: MAX_DAMAGE,
-          emoji: "🫥",
           color: "#6d5b73",
           goldRate: grades[grades.length - 1].goldRate,
           desc: "온전한 정신을 유지하기 힘들다.",
         };
 
+        function gradeImageMarkup(grade, className = "") {
+          const classes = ["mental-grade-img", className]
+            .filter(Boolean)
+            .join(" ");
+          return `<img src="${grade.image}" alt="" class="${classes}" loading="eager" draggable="false">`;
+        }
+
+        function setGradeImage(target, grade, className = "") {
+          if (!target) return;
+          target.innerHTML = gradeImageMarkup(grade, className);
+        }
+
+        const gradeImageCache = new Map();
+        function loadGradeImage(grade) {
+          const key = grade.image;
+          if (!gradeImageCache.has(key)) {
+            gradeImageCache.set(
+              key,
+              new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () =>
+                  reject(new Error(`등급 이미지 로드 실패: ${grade.image}`));
+                img.src = grade.image;
+              }),
+            );
+          }
+          return gradeImageCache.get(key);
+        }
+
+        function uiIconMarkup(src, className = "") {
+          const classes = ["ui-icon", className].filter(Boolean).join(" ");
+          return `<img src="${src}" alt="" class="${classes}" draggable="false">`;
+        }
+
         const SHOP_ITEMS = [
           {
             id: "mental-reset",
             name: "멘탈 완전회복권",
-            icon: "🩹",
+            image: "assets/ui/heal.png",
             tag: "RECOVERY / INSTANT",
             price: 3000,
             desc: "누적 데미지를 즉시 0으로 되돌린다. 돌이킬 수 없는 강을 건넌자를 위한 아이템",
@@ -1951,7 +3094,7 @@
           {
             id: "recovery-boost-1h",
             name: "집중 회복 부스터",
-            icon: "⚡",
+            image: "assets/ui/boost.png",
             tag: "BOOST / 1 HOUR",
             price: 800,
             desc: "발동 후 현실시간 1시간 동안 공부 중 멘탈 회복속도가 2배가 된다. 공부를 멈추거나 브라우저를 닫아도 지속시간은 계속 흐른다. 이미 활성화 중이면 1시간이 추가 연장된다.",
@@ -2128,29 +3271,10 @@
             $("offlineMiniFill").style.width = pct + "%";
             $("offlineMiniFill").style.background =
               `linear-gradient(90deg, ${afterGrade.color}, ${afterGrade.color}cc)`;
-            $("offlineFace").textContent = afterGrade.emoji;
+            setGradeImage($("offlineFace"), afterGrade, "offline-main");
             const worsened = beforeGrade.name !== afterGrade.name;
             const severityText = worsened ? "등급 악화 감지" : "등급 유지";
             const severityStyle = `color:${worsened ? "#9d4d58" : "#4c7562"};border-color:${worsened ? "#d4a1a8" : "#b8d0c0"};background:${worsened ? "#fff2f4" : "#f2fbf6"};`;
-            $("offlineGradeChange").innerHTML = `
-        <div class="offline-grade-top">
-          <div class="offline-grade-label">MENTAL GRADE UPDATE</div>
-          <div class="offline-severity" style="${severityStyle}">${severityText}</div>
-        </div>
-        <div class="offline-grade-flow">
-          <div class="offline-badge" style="color:${beforeGrade.color}">
-            <span>${beforeGrade.emoji}</span>
-            <div><small>이전</small><br>${beforeGrade.name}</div>
-          </div>
-          <div class="offline-arrow">→</div>
-          <div class="offline-badge" style="color:${afterGrade.color}">
-            <span>${afterGrade.emoji}</span>
-            <div><small>현재</small><br>${afterGrade.name}</div>
-          </div>
-        </div>
-        <div class="offline-grade-summary">
-          ${worsened ? `멘탈 등급이 <b>${beforeGrade.name}</b>에서 <b>${afterGrade.name}</b>으로 악화되었어.` : `멘탈 등급은 <b>${afterGrade.name}</b> 상태를 유지했어.`}
-        </div>`;
             $("offlineModal").showModal();
           }
         }
@@ -2172,14 +3296,11 @@
           barText.textContent = pct.toFixed(1) + "%";
           const g = currentGrade();
           $("goldValue").textContent = Math.floor(gold).toLocaleString("ko-KR");
-          $("goldRateTop").textContent = studying
-            ? `+${g.goldRate.toFixed(3)} G / sec · ${g.name} · 공부 중`
-            : `공부 시작 시 ${g.goldRate.toFixed(3)} G/s`;
           barFill.style.background = `linear-gradient(90deg, ${g.color}, ${g.color}cc)`;
           barFill.style.color = g.color;
           portrait.style.color = g.color;
           portrait.style.borderColor = g.color + "66";
-          face.textContent = g.emoji;
+          setGradeImage(face, g, "main");
           gradeEl.textContent = g.name;
           gradeEl.style.color = g.color;
           descEl.textContent = g.desc;
@@ -2198,12 +3319,12 @@
           const effects = [];
           if (g === SAGE_STATE) {
             effects.push(
-              `<div class="effect-chip">🧘 대현자 · 공부 중 골드 +30%</div>`,
+              `<div class="effect-chip">${gradeImageMarkup(SAGE_STATE, "effect-grade-img")} 대현자 · 공부 중 골드 +30%</div>`,
             );
           }
           if (isRecoveryBoostActive()) {
             effects.push(
-              `<div class="effect-chip boost">⚡ 회복속도 ×2 <span class="effect-time">${fmtCountdown(boosterRemainingMs())}</span></div>`,
+              `<div class="effect-chip boost">${uiIconMarkup("assets/ui/boost.png", "effect-ui-icon")} 회복속도 ×2 <span class="effect-time">${fmtCountdown(boosterRemainingMs())}</span></div>`,
             );
           }
           $("activeEffects").innerHTML = effects.join("");
@@ -2226,7 +3347,7 @@
           $("balanceInfo").innerHTML =
             goalHours >= 24
               ? `밸런스 기준: 하루 <b>24시간 공부</b> 목표에서는 비공부 시간이 0시간이므로 공부 중 데미지 변화량은 <b>0 / sec</b>로 설정됩니다.`
-              : `밸런스 기준: 하루 ${restHours}시간 비공부 + <b>${goalHours}시간 공부</b> 시 누적 데미지 순변화 ≈ 0<br>현재 기본 회복 속도: <b>${studyRate().toFixed(3)} / sec</b> (비공부 데미지의 ${ratio.toFixed(2)}배)${isRecoveryBoostActive() ? `<br>⚡ 부스터 활성 중: 공부 시 <b>${(studyRate() * 2).toFixed(3)} / sec</b>` : ""}`;
+              : `밸런스 기준: 하루 ${restHours}시간 비공부 + <b>${goalHours}시간 공부</b> 시 누적 데미지 순변화 ≈ 0<br>현재 기본 회복 속도: <b>${studyRate().toFixed(3)} / sec</b> (비공부 데미지의 ${ratio.toFixed(2)}배)${isRecoveryBoostActive() ? `<br><span class="inline-icon-text">${uiIconMarkup("assets/ui/boost.png", "inline-ui-icon")} 부스터 활성 중: 공부 시 <b>${(studyRate() * 2).toFixed(3)} / sec</b></span>` : ""}`;
           renderHistory();
         }
         function save() {
@@ -2308,7 +3429,7 @@
             [SAGE_STATE, ...grades, MAX_STATE]
               .map(
                 (x) =>
-                  `<tr><td><span style="color:${x.color};font-weight:900">${x.emoji} ${x.name}</span></td><td>+${x.goldRate.toFixed(3)} G/s${x === SAGE_STATE ? " · +30%" : ""}</td></tr>`,
+                  `<tr><td><span class="grade-image-inline">${gradeImageMarkup(x, "mini")}<span style="color:${x.color};font-weight:900">${x.name}</span></span></td><td>+${x.goldRate.toFixed(3)} G/s${x === SAGE_STATE ? " · +30%" : ""}</td></tr>`,
               )
               .join("");
 
@@ -2316,13 +3437,13 @@
             const price = item.price;
             const affordable = gold >= price;
             return `<div class="shop-item">
-        <div class="shop-icon">${item.icon}</div>
+        <div class="shop-icon">${uiIconMarkup(item.image, "shop-item-icon-img")}</div>
         <div class="shop-item-name">${item.name}</div>
         <div class="shop-item-tag">${item.tag}</div>
         <div class="shop-item-desc">${item.desc}
           ${
             item.id === "recovery-boost-1h" && isRecoveryBoostActive()
-              ? `<br><br><b>⚡ 현재 활성 중 · 남은 시간 ${fmtCountdown(boosterRemainingMs())}</b>`
+              ? `<br><br><b class="inline-icon-text">${uiIconMarkup("assets/ui/boost.png", "inline-ui-icon")} 현재 활성 중 · 남은 시간 ${fmtCountdown(boosterRemainingMs())}</b>`
               : ""
           }
         </div>
@@ -2655,14 +3776,18 @@
             location.reload();
             return;
           }
-          localStorage.setItem(TAB_LOCK_KEY, JSON.stringify({ id: tabId, ts: Date.now() }));
+          localStorage.setItem(
+            TAB_LOCK_KEY,
+            JSON.stringify({ id: tabId, ts: Date.now() }),
+          );
         }, TAB_LOCK_HEARTBEAT);
 
         window.addEventListener("storage", (event) => {
           if (event.key !== TAB_LOCK_KEY || !event.newValue) return;
           try {
             const incoming = JSON.parse(event.newValue);
-            if (incoming.id !== tabId && lockIsFresh(incoming)) location.reload();
+            if (incoming.id !== tabId && lockIsFresh(incoming))
+              location.reload();
           } catch {}
         });
         window.addEventListener("beforeunload", () => {
@@ -2671,7 +3796,8 @@
           lastTs = Date.now();
           save();
           const current = readTabLock();
-          if (current && current.id === tabId) localStorage.removeItem(TAB_LOCK_KEY);
+          if (current && current.id === tabId)
+            localStorage.removeItem(TAB_LOCK_KEY);
         });
         document.addEventListener("visibilitychange", () => {
           // 단순 탭 전환/최소화는 공부 모드를 끄지 않는다. 실제 unload 시에만 자동 종료.
