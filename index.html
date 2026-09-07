@@ -4,7 +4,58 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Menhera's StudyLog</title>
+
+    <meta
+      name="description"
+      content="공부하지 않으면 멘탈 데미지가 쌓이고, 공부하면 회복되는 순공 타이머. Menhera's StudyLog."
+    />
+    <meta name="application-name" content="Menhera's StudyLog" />
+    <meta name="theme-color" content="#f7f5ef" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mental.study-log.kro.kr/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Menhera's StudyLog" />
+    <meta property="og:title" content="Menhera's StudyLog" />
+    <meta
+      property="og:description"
+      content="공부하지 않으면 멘탈 데미지가 쌓이고, 공부하면 회복되는 순공 타이머."
+    />
+    <meta property="og:url" content="https://mental.study-log.kro.kr/" />
+    <meta
+      property="og:image"
+      content="https://mental.study-log.kro.kr/assets/share/og-thumbnail.png"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://mental.study-log.kro.kr/assets/share/og-thumbnail.png"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Menhera's StudyLog에서 넋이 나간 표정으로 책상에 엎드려 공부하는 캐릭터"
+    />
+    <meta property="og:locale" content="ko_KR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Menhera's StudyLog" />
+    <meta
+      name="twitter:description"
+      content="공부하지 않으면 멘탈 데미지가 쌓이고, 공부하면 회복되는 순공 타이머."
+    />
+    <meta
+      name="twitter:image"
+      content="https://mental.study-log.kro.kr/assets/share/og-thumbnail.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="Menhera's StudyLog에서 넋이 나간 표정으로 책상에 엎드려 공부하는 캐릭터"
+    />
+
     <link rel="icon" type="image/png" href="assets/ui/book.png" />
+    <link rel="apple-touch-icon" href="assets/ui/book.png" />
     <style>
       :root {
         --paper: #f7f5ef;
@@ -1928,6 +1979,7 @@
         flex: 0 0 20px;
         vertical-align: middle;
       }
+
     </style>
   </head>
   <body>
@@ -1950,9 +2002,7 @@
           type="button"
           role="menuitem"
         >
-          <span class="utility-menu-icon"
-            ><img src="assets/ui/share.png" alt="" class="ui-icon"
-          /></span>
+          <span class="utility-menu-icon"><img src="assets/ui/share.png" alt="" class="ui-icon" /></span>
           <span>현재 상태 공유</span>
         </button>
         <button
@@ -1961,9 +2011,7 @@
           type="button"
           role="menuitem"
         >
-          <span class="utility-menu-icon"
-            ><img src="assets/ui/help.png" alt="" class="ui-icon"
-          /></span>
+          <span class="utility-menu-icon"><img src="assets/ui/help.png" alt="" class="ui-icon" /></span>
           <span>도움말</span>
         </button>
       </div>
@@ -1984,21 +2032,11 @@
           <div class="wallet-zone">
             <div>
               <div class="wallet-pill">
-                <span class="wallet-coin"
-                  ><img
-                    src="assets/ui/coin.png"
-                    alt=""
-                    class="ui-icon wallet-coin-img" /></span
+                <span class="wallet-coin"><img src="assets/ui/coin.png" alt="" class="ui-icon wallet-coin-img" /></span
                 ><span id="goldValue">0</span> G
               </div>
-            </div>
-            <button id="shopOpen" class="shop-open">
-              <img
-                src="assets/ui/shop.png"
-                alt=""
-                class="ui-icon button-icon"
-              />상점
-            </button>
+</div>
+            <button id="shopOpen" class="shop-open"><img src="assets/ui/shop.png" alt="" class="ui-icon button-icon" />상점</button>
           </div>
         </div>
         <div class="bar-shell">
@@ -2110,12 +2148,7 @@
           <div class="shop-wallet-card">
             <div class="shop-card-kicker">My Wallet</div>
             <div class="shop-wallet-big">
-              <span class="coin"
-                ><img
-                  src="assets/ui/coin.png"
-                  alt=""
-                  class="ui-icon shop-coin-img" /></span
-              ><span id="shopGoldValue">0</span> G
+              <span class="coin"><img src="assets/ui/coin.png" alt="" class="ui-icon shop-coin-img" /></span><span id="shopGoldValue">0</span> G
             </div>
             <div class="shop-rate-line">
               공부 중일 때 벌 수 있는 재화. 획득한 골드로 유용한 아이템을 구매할
@@ -2310,13 +2343,7 @@
       </div>
       <div class="offline-body">
         <div class="offline-hero">
-          <div id="offlineFace" class="offline-face">
-            <img
-              src="assets/ui/offline.png"
-              alt=""
-              class="ui-icon offline-initial-icon"
-            />
-          </div>
+          <div id="offlineFace" class="offline-face"><img src="assets/ui/offline.png" alt="" class="ui-icon offline-initial-icon" /></div>
           <div>
             <div class="offline-title">
               공부하지 않은 시간이 정산되었습니다.
@@ -2421,13 +2448,7 @@
 
         <div class="help-grid">
           <section class="help-card">
-            <h3>
-              <img
-                src="assets/ui/timer.png"
-                alt=""
-                class="ui-icon help-title-icon"
-              />순공 시작 / 종료
-            </h3>
+            <h3><img src="assets/ui/timer.png" alt="" class="ui-icon help-title-icon" />순공 시작 / 종료</h3>
             <p>
               <b>공부 시작</b>을 누른 동안만 순공 시간이 기록돼. 공부 중에는
               멘탈 데미지가 회복되고 골드를 얻을 수 있어.
@@ -2435,13 +2456,7 @@
           </section>
 
           <section class="help-card">
-            <h3>
-              <img
-                src="assets/ui/damage.png"
-                alt=""
-                class="ui-icon help-title-icon"
-              />멘탈 데미지
-            </h3>
+            <h3><img src="assets/ui/damage.png" alt="" class="ui-icon help-title-icon" />멘탈 데미지</h3>
             <p>
               비공부 상태에서는 데미지가 계속 증가해. 누적 데미지에 따라 멘탈
               등급이 변하며, 공부해서 다시 낮출 수 있어.
@@ -2449,13 +2464,7 @@
           </section>
 
           <section class="help-card">
-            <h3>
-              <img
-                src="assets/ui/target.png"
-                alt=""
-                class="ui-icon help-title-icon"
-              />일일 순공 목표
-            </h3>
+            <h3><img src="assets/ui/target.png" alt="" class="ui-icon help-title-icon" />일일 순공 목표</h3>
             <p>
               목표시간에 맞춰 <b>공부 중 회복 속도</b>가 자동 조정돼. 예를 들어
               4시간 목표는 하루 20시간의 비공부 데미지를 4시간 공부로 상쇄하는
@@ -2464,13 +2473,7 @@
           </section>
 
           <section class="help-card">
-            <h3>
-              <img
-                src="assets/ui/coin.png"
-                alt=""
-                class="ui-icon help-title-icon"
-              />골드 & 상점
-            </h3>
+            <h3><img src="assets/ui/coin.png" alt="" class="ui-icon help-title-icon" />골드 & 상점</h3>
             <p>
               골드는 <b>공부 중에만</b> 획득해. 멘탈 상태에 따라 획득 속도가
               달라지고, 모은 골드는 상점 아이템 구매에 사용할 수 있어.
@@ -2478,13 +2481,7 @@
           </section>
 
           <section class="help-card">
-            <h3>
-              <img
-                src="assets/ui/offline.png"
-                alt=""
-                class="ui-icon help-title-icon"
-              />접속하지 않은 시간
-            </h3>
+            <h3><img src="assets/ui/offline.png" alt="" class="ui-icon help-title-icon" />접속하지 않은 시간</h3>
             <p>
               페이지를 닫거나 다시 접속하면 공부 모드는 종료돼. 마지막 저장 이후
               경과시간은 비공부 시간으로 계산되어 <b>방치 데미지</b>가 정산돼.
@@ -2503,21 +2500,15 @@
 
     <div id="singleTabOverlay" class="single-tab-overlay" aria-live="polite">
       <div class="single-tab-card">
-        <div class="single-tab-icon">
-          <img
-            src="assets/ui/book.png"
-            alt=""
-            class="ui-icon single-tab-book-icon"
-          />
-        </div>
+        <div class="single-tab-icon"><img src="assets/ui/book.png" alt="" class="ui-icon single-tab-book-icon" /></div>
         <h2>Menhera's StudyLog가 다른 탭에서 실행 중이야</h2>
         <p>
           순공시간, 데미지, 골드가 서로 덮어쓰이는 것을 막기 위해 한 번에 하나의
           탭만 메인 실행권을 가질 수 있어.
         </p>
         <div class="single-tab-note">
-          기존 Menhera's StudyLog 탭을 닫으면 이 화면이 자동으로 해제돼. 비정상
-          종료된 경우에도 잠시 후 실행권을 다시 확인해.
+          기존 Menhera's StudyLog 탭을 닫으면 이 화면이 자동으로 해제돼. 비정상 종료된
+          경우에도 잠시 후 실행권을 다시 확인해.
         </div>
         <div class="single-tab-actions">
           <button id="singleTabCheckBtn" type="button">다시 확인</button>
@@ -2760,7 +2751,7 @@
 
           ctx.fillStyle = "#242424";
           ctx.font = '900 68px "Noto Sans KR", Arial, sans-serif';
-          ctx.fillText("오늘의 생존 기록", pad, 192);
+          ctx.fillText("오늘의 공부 생존 기록", pad, 192);
 
           // Mental badge
           ctx.fillStyle = g.color + "22";
@@ -2854,8 +2845,18 @@
             }
           };
 
-          drawStat(pad, "오늘 순공", fmt(todaySeconds), "");
-          drawStat(pad + statW + gap, "일일 목표", `${goalHours}시간`, "");
+          drawStat(
+            pad,
+            "오늘 순공",
+            fmt(todaySeconds),
+            "",
+          );
+          drawStat(
+            pad + statW + gap,
+            "일일 목표",
+            `${goalHours}시간`,
+            "",
+          );
 
           // Footer
           ctx.strokeStyle = "#cbc4b9";
@@ -2867,7 +2868,7 @@
 
           ctx.fillStyle = "#4f4a44";
           ctx.font = '900 29px "Noto Sans KR", Arial, sans-serif';
-          ctx.fillText("멘탈 데미지와 싸우는 순공 타이머", pad, 965);
+          ctx.fillText("공부 안 하면 멘탈 데미지가 쌓이는 타이머", pad, 965);
 
           ctx.fillStyle = "#777168";
           ctx.font = '700 24px "Noto Sans KR", Arial, sans-serif';
@@ -3073,6 +3074,7 @@
           }
           return gradeImageCache.get(key);
         }
+
 
         function uiIconMarkup(src, className = "") {
           const classes = ["ui-icon", className].filter(Boolean).join(" ");
@@ -3296,7 +3298,7 @@
           barText.textContent = pct.toFixed(1) + "%";
           const g = currentGrade();
           $("goldValue").textContent = Math.floor(gold).toLocaleString("ko-KR");
-          barFill.style.background = `linear-gradient(90deg, ${g.color}, ${g.color}cc)`;
+barFill.style.background = `linear-gradient(90deg, ${g.color}, ${g.color}cc)`;
           barFill.style.color = g.color;
           portrait.style.color = g.color;
           portrait.style.borderColor = g.color + "66";
