@@ -1,0 +1,2688 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mental Damage Study Timer</title>
+    <style>
+      :root {
+        --paper: #f7f5ef;
+        --paper-2: #fffdf8;
+        --ink: #242424;
+        --muted: #757575;
+        --line: #cfcac0;
+        --line-dark: #9c978d;
+        --accent: #5f8067;
+        --danger: #b85e67;
+        --shadow: 0 10px 30px rgba(64, 58, 48, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family:
+          "Nanum Pen Script", "Gaegu", "Noto Sans KR", system-ui, sans-serif;
+        background-color: var(--paper);
+        background-image:
+          linear-gradient(rgba(80, 120, 180, 0.055) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(80, 120, 180, 0.035) 1px,
+            transparent 1px
+          ),
+          radial-gradient(
+            circle at 20% 20%,
+            rgba(130, 110, 85, 0.045) 0 1px,
+            transparent 1.6px
+          ),
+          radial-gradient(
+            circle at 80% 60%,
+            rgba(130, 110, 85, 0.035) 0 1px,
+            transparent 1.8px
+          );
+        background-size:
+          28px 28px,
+          28px 28px,
+          22px 22px,
+          29px 29px;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.22;
+        background: repeating-linear-gradient(
+          0deg,
+          rgba(80, 70, 55, 0.018) 0 1px,
+          transparent 1px 4px
+        );
+        mix-blend-mode: multiply;
+      }
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 18px;
+        padding: 22px;
+        max-width: 1500px;
+        margin: auto;
+      }
+      .boss-wrap,
+      .panel,
+      dialog {
+        background: rgba(255, 253, 248, 0.94);
+        border: 1.5px solid var(--line-dark);
+        box-shadow: var(--shadow);
+        border-radius: 8px;
+        position: relative;
+      }
+      .boss-wrap::after,
+      .panel::after {
+        content: "";
+        position: absolute;
+        inset: 4px;
+        border: 1px dashed rgba(95, 88, 74, 0.18);
+        border-radius: 6px;
+        pointer-events: none;
+      }
+      .boss-wrap {
+        padding: 16px 18px 18px;
+      }
+      .boss-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 10px;
+      }
+      .boss-title,
+      .panel-header,
+      .today-label {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        color: #6f6b63;
+        text-transform: uppercase;
+        font-weight: 800;
+      }
+      .damage-line {
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        flex-wrap: wrap;
+      }
+      .damage-value {
+        font-family: "Courier New", monospace;
+        font-weight: 900;
+        font-size: clamp(22px, 2.3vw, 34px);
+        font-variant-numeric: tabular-nums;
+      }
+      .rate {
+        font-family: "Courier New", monospace;
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .rate.up {
+        color: var(--danger);
+      }
+      .rate.down {
+        color: var(--accent);
+      }
+      .bar-shell {
+        height: 30px;
+        padding: 5px;
+        background: #eee9df;
+        border: 1.5px solid #8d887f;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        width: 0;
+        border-radius: 2px;
+        transition:
+          width 0.35s ease,
+          background 0.35s ease;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0.18) 0 5px,
+          rgba(255, 255, 255, 0) 5px 10px
+        );
+      }
+      .bar-text {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        font-weight: 900;
+        color: #222;
+        letter-spacing: 0.08em;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: minmax(220px, 300px) minmax(420px, 1fr) minmax(
+            250px,
+            330px
+          );
+        gap: 18px;
+        align-items: stretch;
+      }
+      .panel-header {
+        padding: 18px 18px 0;
+      }
+      .left {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 18px;
+        min-height: 510px;
+      }
+      .history-preview {
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+      }
+      .history-item {
+        border: 1.2px solid #bcb6aa;
+        background: rgba(255, 255, 255, 0.58);
+        border-radius: 6px;
+        padding: 12px;
+        transform: rotate(-0.15deg);
+      }
+      .history-item:nth-child(even) {
+        transform: rotate(0.15deg);
+      }
+      .history-item .date {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .history-item .time {
+        font-family: "Courier New", monospace;
+        font-size: 19px;
+        font-weight: 900;
+        margin-top: 4px;
+        font-variant-numeric: tabular-nums;
+      }
+      .history-empty {
+        color: #7d786f;
+        font-size: 15px;
+        padding: 18px 6px;
+        line-height: 1.6;
+      }
+      .history-btn,
+      .secondary,
+      .close,
+      .admin-open,
+      .admin-btn,
+      .reset-link {
+        border: 1.3px solid #8e887e;
+        background: #fffdf8;
+        color: #2f2d29;
+        border-radius: 6px;
+        padding: 11px 14px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.15s;
+        box-shadow: 2px 2px 0 rgba(80, 75, 65, 0.12);
+      }
+      .history-btn {
+        margin: 0 18px;
+      }
+      .history-btn:hover,
+      .secondary:hover,
+      .close:hover,
+      .admin-open:hover,
+      .admin-btn:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 rgba(80, 75, 65, 0.13);
+      }
+
+      .center {
+        min-height: 510px;
+        display: grid;
+        place-items: center;
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+      .center::before {
+        content: "FOCUS";
+        position: absolute;
+        font-size: 180px;
+        color: rgba(80, 75, 65, 0.035);
+        font-weight: 900;
+        transform: rotate(-8deg);
+        font-family: "Courier New", monospace;
+        pointer-events: none;
+      }
+      .timer-box {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        width: 100%;
+        max-width: 720px;
+      }
+      .timer {
+        font-family: "Courier New", monospace;
+        font-size: clamp(58px, 8vw, 118px);
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: -0.045em;
+        font-variant-numeric: tabular-nums;
+        margin: 16px 0 8px;
+        color: #222;
+      }
+      .status {
+        font-size: 17px;
+        color: #69645b;
+        min-height: 24px;
+      }
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .active-effects {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        min-height: 31px;
+        margin-top: 10px;
+      }
+      .effect-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 10px;
+        border: 1px solid #bcae87;
+        border-radius: 999px;
+        background: #fff8df;
+        box-shadow: 1px 2px 0 rgba(91, 79, 46, 0.08);
+        font:
+          800 11px "Noto Sans KR",
+          sans-serif;
+        color: #62552f;
+      }
+      .effect-chip .effect-time {
+        font:
+          900 12px "Courier New",
+          monospace;
+        color: #8b651b;
+      }
+      .effect-chip.boost {
+        animation: effectPulse 2.4s ease-in-out infinite;
+      }
+      @keyframes effectPulse {
+        0%,
+        100% {
+          box-shadow: 1px 2px 0 rgba(91, 79, 46, 0.08);
+        }
+        50% {
+          box-shadow:
+            0 0 0 4px rgba(224, 190, 94, 0.12),
+            1px 2px 0 rgba(91, 79, 46, 0.08);
+        }
+      }
+      .goal-control {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+      .goal-label {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: #777168;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+      .goal-btn {
+        border: 1.4px solid #8e887e;
+        background: #fffdf8;
+        color: #34312d;
+        border-radius: 999px;
+        padding: 9px 14px;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 13px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 rgba(80, 75, 65, 0.12);
+        transition: 0.15s;
+      }
+      .goal-btn:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 rgba(80, 75, 65, 0.13);
+      }
+      .goal-btn strong {
+        font-family: "Courier New", monospace;
+        font-size: 15px;
+      }
+      button.primary,
+      button.secondary {
+        font-family: inherit;
+        font-size: 18px;
+        min-width: 170px;
+      }
+      button.primary {
+        border: 2px solid #4e6d57;
+        border-radius: 6px;
+        padding: 14px 24px;
+        background: #eef6ef;
+        color: #27432f;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 #b5c8b9;
+        transition: 0.15s;
+      }
+      button.primary.active {
+        border-color: #9b4d57;
+        background: #fbefef;
+        color: #7c3039;
+        box-shadow: 3px 3px 0 #dfb4b8;
+      }
+      button:hover {
+        transform: translate(-1px, -1px);
+      }
+      .micro {
+        margin-top: 16px;
+        color: #777168;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .right {
+        padding-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        min-height: 510px;
+      }
+      .mental-card {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+        flex: 1;
+        justify-content: center;
+      }
+      .portrait {
+        width: 180px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 2px solid #948f86;
+        background: #faf7f0;
+        display: grid;
+        place-items: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+          inset 0 0 0 7px #fffdf8,
+          0 0 0 1px #c5bfb4;
+      }
+      .portrait::before {
+        content: "";
+        position: absolute;
+        inset: 14px;
+        border: 1px dashed currentColor;
+        border-radius: 50%;
+        opacity: 0.35;
+      }
+      .portrait .face {
+        font-size: 86px;
+        filter: grayscale(0.08);
+        transition: 0.25s transform;
+      }
+      .grade {
+        font-size: 42px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+      .grade-desc {
+        font-size: 16px;
+        color: #6f6960;
+        line-height: 1.65;
+        max-width: 250px;
+      }
+      .range {
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        color: #6d675f;
+        background: #f3efe7;
+        border: 1px solid #bdb6aa;
+        border-radius: 4px;
+        padding: 7px 10px;
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        color: #777168;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        padding: 0 4px 6px;
+        flex-wrap: wrap;
+      }
+      .footer-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .admin-open {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+
+      .single-tab-overlay {
+        position: fixed; inset: 0; z-index: 99999; display: none; place-items: center; padding: 22px;
+        background: linear-gradient(rgba(247,245,239,.88),rgba(247,245,239,.94)), repeating-linear-gradient(0deg,rgba(80,70,55,.025) 0 1px,transparent 1px 4px);
+        backdrop-filter: blur(7px);
+      }
+      .single-tab-overlay.show { display: grid; }
+      .single-tab-card { width:min(560px,calc(100vw - 32px)); padding:28px; text-align:center; background:#fffdf8; border:1.5px solid var(--line-dark); border-radius:12px; box-shadow:0 18px 50px rgba(64,58,48,.14); position:relative; }
+      .single-tab-card::after { content:""; position:absolute; inset:7px; border:1px dashed rgba(95,88,74,.2); border-radius:8px; pointer-events:none; }
+      .single-tab-icon { font-size:44px; margin-bottom:10px; }
+      .single-tab-card h2 { margin:0 0 10px; font-size:28px; }
+      .single-tab-card p { margin:0; color:#686159; line-height:1.75; font-size:15px; }
+      .single-tab-note { margin-top:16px; padding:11px 12px; border-left:4px solid #bda977; border-radius:8px; background:#faf5e9; color:#675f51; font-family:"Noto Sans KR",sans-serif; font-size:12px; line-height:1.65; }
+      .single-tab-actions { margin-top:18px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; position:relative; z-index:1; }
+      .single-tab-actions button { border:1.3px solid #8e887e; background:#fffdf8; color:#2f2d29; border-radius:6px; padding:10px 14px; font-weight:900; cursor:pointer; box-shadow:2px 2px 0 rgba(80,75,65,.12); }
+
+      dialog {
+        padding: 0;
+        color: var(--ink);
+        width: min(720px, calc(100vw - 28px));
+        max-height: 84vh;
+        border: 1.5px solid var(--line-dark);
+        background: rgba(255, 252, 246, 0.98);
+        overflow: hidden;
+      }
+      dialog::backdrop {
+        background: rgba(60, 54, 46, 0.26);
+        backdrop-filter: blur(4px);
+      }
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 20px;
+        border-bottom: 1px solid #c8c1b6;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.72),
+          rgba(247, 243, 233, 0.88)
+        );
+      }
+      .modal-head h2 {
+        margin: 0;
+        font-size: 25px;
+      }
+      .records,
+      .admin-body {
+        padding: 16px 20px 22px;
+        overflow: auto;
+        max-height: 66vh;
+      }
+      .record-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+        padding: 13px 2px;
+        border-bottom: 1px dashed #c8c1b6;
+      }
+      .record-time {
+        font-family: "Courier New", monospace;
+        font-weight: 900;
+      }
+      .danger-zone {
+        margin-top: 20px;
+        border-top: 1px dashed #c8c1b6;
+        padding-top: 14px;
+      }
+      .reset-link {
+        color: #9b404b;
+        border-color: #b37a82;
+        background: #fff7f7;
+      }
+
+      .offline-head {
+        align-items: flex-start;
+      }
+      .offline-head .offline-eyebrow {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        color: #7f7a72;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .offline-dialog {
+        width: min(864px, calc(100vw - 28px));
+        max-height: min(88vh, 920px);
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .offline-dialog[open] {
+        display: flex;
+      }
+      .offline-dialog .offline-head {
+        flex: 0 0 auto;
+      }
+      .offline-body {
+        padding: 22px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        min-height: 0;
+        background:
+          radial-gradient(
+            circle at top right,
+            rgba(255, 200, 120, 0.1),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at left bottom,
+            rgba(120, 150, 255, 0.08),
+            transparent 24%
+          ),
+          linear-gradient(
+            180deg,
+            rgba(255, 253, 249, 0.97),
+            rgba(247, 244, 236, 0.97)
+          );
+      }
+      .offline-hero {
+        display: grid;
+        grid-template-columns: 88px 1fr;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .offline-face {
+        width: 88px;
+        height: 88px;
+        border-radius: 26px;
+        border: 1.5px solid #c2bbae;
+        background: linear-gradient(180deg, #fffdf8, #f2ede3);
+        display: grid;
+        place-items: center;
+        font-size: 44px;
+        box-shadow:
+          inset 0 0 0 5px rgba(255, 255, 255, 0.65),
+          0 8px 24px rgba(90, 80, 65, 0.08);
+        transform: rotate(-3deg);
+      }
+      .offline-title {
+        font-size: 30px;
+        font-weight: 900;
+        line-height: 1.12;
+        letter-spacing: -0.03em;
+      }
+      .offline-subtitle {
+        margin-top: 8px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #686259;
+      }
+      .offline-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 18px 0;
+      }
+      .offline-stat {
+        position: relative;
+        border: 1px solid #c9c1b5;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.62);
+        padding: 14px 14px 12px;
+        box-shadow: 0 6px 18px rgba(82, 74, 61, 0.05);
+      }
+      .offline-stat::after {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        border: 1px dashed rgba(120, 110, 96, 0.18);
+        border-radius: 9px;
+        pointer-events: none;
+      }
+      .offline-stat .label {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #7b756d;
+        font-weight: 900;
+      }
+      .offline-stat .value {
+        margin-top: 8px;
+        font-size: 28px;
+        font-weight: 900;
+        font-family: "Courier New", monospace;
+        font-variant-numeric: tabular-nums;
+        position: relative;
+        z-index: 1;
+      }
+      .offline-stat.damage .value {
+        color: #a34d58;
+      }
+      .offline-stat.total .value {
+        font-size: 24px;
+      }
+      .offline-grade {
+        margin-top: 6px;
+        border: 1px solid #c8c0b3;
+        border-radius: 16px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(247, 242, 233, 0.96)
+        );
+        padding: 16px 18px;
+        box-shadow: 0 10px 24px rgba(88, 79, 64, 0.06);
+      }
+      .offline-grade-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .offline-grade-label {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #7e786f;
+        font-weight: 900;
+      }
+      .offline-severity {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #cbbca9;
+        background: #fffdf8;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .offline-grade-flow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .offline-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        background: #fffefb;
+        font-size: 18px;
+        font-weight: 900;
+        box-shadow: 0 3px 0 rgba(70, 64, 56, 0.08);
+      }
+      .offline-badge small {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 12px;
+        color: #6e685f;
+        font-weight: 800;
+      }
+      .offline-arrow {
+        font-size: 26px;
+        color: #8b8479;
+        font-weight: 900;
+      }
+      .offline-grade-summary {
+        margin-top: 14px;
+        font-size: 18px;
+        line-height: 1.6;
+        color: #504b44;
+      }
+      .offline-grade-summary b {
+        font-weight: 900;
+      }
+      .offline-total-wrap {
+        margin-top: 14px;
+        padding: 14px 14px 12px;
+        border: 1px dashed #bdb5a8;
+        border-radius: 12px;
+        background: rgba(255, 252, 245, 0.85);
+      }
+      .offline-total-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+      }
+      .offline-total-label {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #7f796f;
+        font-weight: 900;
+      }
+      .offline-total-value {
+        font-family: "Courier New", monospace;
+        font-size: 16px;
+        font-weight: 900;
+      }
+      .offline-mini-bar {
+        height: 14px;
+        padding: 2px;
+        border: 1px solid #a29b90;
+        border-radius: 999px;
+        background: #efe8dd;
+        overflow: hidden;
+      }
+      .offline-mini-fill {
+        height: 100%;
+        width: 0;
+        border-radius: 999px;
+        transition:
+          width 0.35s ease,
+          background 0.35s ease;
+        background: #cf7d86;
+      }
+      .offline-note {
+        margin-top: 14px;
+        font-size: 14px;
+        line-height: 1.75;
+        color: #625d54;
+        padding: 14px 15px;
+        border-left: 4px solid #d0b483;
+        background: rgba(255, 251, 242, 0.9);
+        border-radius: 10px;
+      }
+      .offline-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 18px;
+      }
+      .offline-body::-webkit-scrollbar {
+        width: 10px;
+      }
+      .offline-body::-webkit-scrollbar-track {
+        background: #eee8dd;
+        border-left: 1px solid #d7d0c4;
+      }
+      .offline-body::-webkit-scrollbar-thumb {
+        background: #b8b0a4;
+        border: 2px solid #eee8dd;
+        border-radius: 999px;
+      }
+      .offline-body {
+        scrollbar-width: thin;
+        scrollbar-color: #b8b0a4 #eee8dd;
+      }
+      .offline-close {
+        margin: 0;
+        min-width: 132px;
+        background: #f7f1e7;
+      }
+      .goal-dialog {
+        width: min(620px, calc(100vw - 28px));
+        max-height: 82vh;
+      }
+      .goal-body {
+        padding: 20px 22px 24px;
+        overflow: auto;
+        max-height: 68vh;
+      }
+      .goal-intro {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #615c54;
+        margin-bottom: 16px;
+      }
+      .goal-current {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 15px;
+        border: 1px dashed #bdb5a9;
+        border-radius: 10px;
+        background: #faf6ee;
+        margin-bottom: 16px;
+      }
+      .goal-current .value {
+        font-family: "Courier New", monospace;
+        font-weight: 900;
+        font-size: 20px;
+      }
+      .goal-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 9px;
+      }
+      .goal-option {
+        border: 1.2px solid #aaa398;
+        background: #fffdf8;
+        border-radius: 8px;
+        padding: 10px 5px;
+        font:
+          900 14px "Courier New",
+          monospace;
+        cursor: pointer;
+        box-shadow: 1px 2px 0 rgba(70, 65, 58, 0.08);
+      }
+      .goal-option:hover {
+        background: #f1f6ef;
+        border-color: #728a76;
+      }
+      .goal-option.selected {
+        background: #eaf4ec;
+        border: 2px solid #58725f;
+        color: #26452f;
+        box-shadow: 2px 3px 0 #c1d2c5;
+      }
+      .goal-balance {
+        margin-top: 17px;
+        padding: 13px 15px;
+        border-left: 4px solid #8ca594;
+        background: #f4f8f2;
+        border-radius: 8px;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #5f655e;
+      }
+      .wallet-zone {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .wallet-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 11px;
+        border: 1.2px solid #b6aa88;
+        border-radius: 999px;
+        background: #fff9e9;
+        box-shadow: 2px 2px 0 rgba(97, 83, 48, 0.09);
+        font-family: "Courier New", monospace;
+        font-weight: 900;
+      }
+      .wallet-coin {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #e8c768;
+        border: 1px solid #b89535;
+        color: #725a19;
+        font-size: 12px;
+        box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.28);
+      }
+      .wallet-rate {
+        font-size: 11px;
+        color: #756d5e;
+        font-family: "Courier New", monospace;
+        font-weight: 800;
+      }
+      .shop-open {
+        border: 1.3px solid #8e887e;
+        background: #fffdf8;
+        color: #2f2d29;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 rgba(80, 75, 65, 0.12);
+      }
+      .shop-open:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 rgba(80, 75, 65, 0.13);
+      }
+
+      .shop-dialog {
+        width: min(980px, calc(100vw - 28px));
+        max-height: 88vh;
+        overflow: hidden;
+      }
+      .shop-body {
+        padding: 20px 22px 24px;
+        overflow-y: auto;
+        max-height: calc(88vh - 76px);
+        scrollbar-width: thin;
+        scrollbar-color: #b8b0a4 #eee8dd;
+      }
+      .shop-body::-webkit-scrollbar {
+        width: 10px;
+      }
+      .shop-body::-webkit-scrollbar-track {
+        background: #eee8dd;
+      }
+      .shop-body::-webkit-scrollbar-thumb {
+        background: #b8b0a4;
+        border: 2px solid #eee8dd;
+        border-radius: 999px;
+      }
+      .shop-summary {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .shop-wallet-card,
+      .shop-rate-card {
+        border: 1px solid #c4bcaf;
+        background: rgba(255, 255, 255, 0.68);
+        border-radius: 12px;
+        padding: 16px;
+        position: relative;
+        overflow: hidden;
+      }
+      .shop-wallet-card::after,
+      .shop-rate-card::after {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        border: 1px dashed rgba(116, 105, 87, 0.18);
+        border-radius: 9px;
+        pointer-events: none;
+      }
+      .shop-card-kicker {
+        font:
+          900 11px "Noto Sans KR",
+          sans-serif;
+        letter-spacing: 0.15em;
+        color: #7c766d;
+        text-transform: uppercase;
+      }
+      .shop-wallet-big {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+        font:
+          900 31px "Courier New",
+          monospace;
+      }
+      .shop-wallet-big .coin {
+        font-size: 25px;
+      }
+      .shop-rate-line {
+        margin-top: 9px;
+        font-size: 15px;
+        line-height: 1.7;
+        color: #5f5a52;
+      }
+      .shop-rate-line b {
+        font-family: "Courier New", monospace;
+      }
+      .shop-section-title {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 20px 0 10px;
+      }
+      .shop-section-title h3 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .shop-section-title span {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        color: #807970;
+      }
+      .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .shop-item {
+        border: 1.2px solid #bdb5aa;
+        border-radius: 12px;
+        background: #fffdf8;
+        padding: 16px;
+        min-height: 240px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        box-shadow: 0 7px 18px rgba(72, 65, 53, 0.05);
+      }
+      .shop-item::after {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        border: 1px dashed rgba(120, 109, 92, 0.15);
+        border-radius: 9px;
+        pointer-events: none;
+      }
+      .shop-item.disabled {
+        opacity: 0.55;
+        filter: grayscale(0.25);
+      }
+      .shop-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        border: 1px solid #bdb5aa;
+        background: #f8f2e8;
+        display: grid;
+        place-items: center;
+        font-size: 30px;
+        transform: rotate(-2deg);
+        margin-bottom: 12px;
+      }
+      .shop-item-name {
+        font-size: 21px;
+        font-weight: 900;
+      }
+      .shop-item-tag {
+        display: inline-flex;
+        width: max-content;
+        margin-top: 7px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid #cbc2b5;
+        font:
+          800 10px "Noto Sans KR",
+          sans-serif;
+        color: #746d63;
+        background: #faf6ef;
+      }
+      .shop-item-desc {
+        margin-top: 10px;
+        color: #666057;
+        line-height: 1.6;
+        font-size: 14px;
+        flex: 1;
+      }
+      .shop-item-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px dashed #c9c1b5;
+      }
+      .shop-price {
+        font:
+          900 18px "Courier New",
+          monospace;
+        color: #755d1d;
+      }
+      .buy-btn {
+        border: 1.3px solid #6f806f;
+        background: #eef6ef;
+        color: #2f4b35;
+        border-radius: 7px;
+        padding: 9px 12px;
+        font-weight: 900;
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+      }
+      .buy-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+        background: #f0eee9;
+        border-color: #aaa398;
+        color: #777;
+      }
+      .shop-message {
+        min-height: 24px;
+        margin: 12px 0 0;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 13px;
+        display: none;
+      }
+      .shop-message.show {
+        display: block;
+      }
+      .shop-message.ok {
+        background: #eef7f0;
+        border: 1px solid #b8d1bd;
+        color: #35553d;
+      }
+      .shop-message.bad {
+        background: #fff1f2;
+        border: 1px solid #d7adb2;
+        color: #8b3e48;
+      }
+      .gold-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 12px;
+      }
+      .gold-table th,
+      .gold-table td {
+        padding: 8px 7px;
+        border-bottom: 1px dashed #ccc4b8;
+        text-align: left;
+      }
+      .gold-table td:last-child,
+      .gold-table th:last-child {
+        text-align: right;
+        font-family: "Courier New", monospace;
+        font-weight: 900;
+      }
+      @media (max-width: 800px) {
+        .shop-summary {
+          grid-template-columns: 1fr;
+        }
+        .shop-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 560px) {
+        .shop-grid {
+          grid-template-columns: 1fr;
+        }
+        .wallet-zone {
+          justify-content: flex-start;
+        }
+        .shop-dialog {
+          width: calc(100vw - 14px);
+          max-height: 92vh;
+        }
+        .shop-body {
+          max-height: calc(92vh - 74px);
+        }
+      }
+      .admin-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .admin-card {
+        border: 1px solid #bbb4a9;
+        background: #fbf8f1;
+        border-radius: 6px;
+        padding: 14px;
+      }
+      .admin-card h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+      }
+      .admin-card label {
+        display: block;
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        color: #6f6961;
+        margin-bottom: 6px;
+      }
+      .admin-card input,
+      .admin-card select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #aaa398;
+        background: #fffdf8;
+        border-radius: 5px;
+        font:
+          14px "Courier New",
+          monospace;
+      }
+      .admin-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .admin-btn {
+        font-size: 13px;
+        padding: 8px 10px;
+      }
+      .admin-note {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 11px;
+        color: #777168;
+        line-height: 1.7;
+        margin-top: 14px;
+      }
+      .admin-login {
+        padding: 22px;
+      }
+      .admin-login input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #aaa398;
+        border-radius: 5px;
+        background: #fffdf8;
+        margin: 10px 0;
+        font-size: 16px;
+      }
+      @media (max-width: 950px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+        .center {
+          order: 1;
+          min-height: 440px;
+        }
+        .right {
+          order: 2;
+          min-height: auto;
+        }
+        .left {
+          order: 3;
+          min-height: auto;
+        }
+        .mental-card {
+          flex-direction: row;
+          text-align: left;
+          justify-content: flex-start;
+        }
+        .portrait {
+          width: 130px;
+        }
+        .portrait .face {
+          font-size: 64px;
+        }
+        .offline-stats {
+          grid-template-columns: 1fr;
+        }
+        .offline-hero {
+          grid-template-columns: 1fr;
+          justify-items: start;
+        }
+        .offline-face {
+          width: 76px;
+          height: 76px;
+          font-size: 38px;
+        }
+      }
+      @media (max-width: 580px) {
+        .goal-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .offline-dialog {
+          max-height: 92vh;
+          width: calc(100vw - 16px);
+        }
+        .app {
+          padding: 12px;
+        }
+        .boss-meta {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .center {
+          padding: 20px 14px;
+        }
+        .timer {
+          font-size: 58px;
+        }
+        .mental-card {
+          flex-direction: column;
+          text-align: center;
+        }
+        .admin-grid {
+          grid-template-columns: 1fr;
+        }
+        .offline-title {
+          font-size: 24px;
+        }
+        .offline-grade-flow {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .offline-arrow {
+          transform: rotate(90deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <section class="boss-wrap">
+        <div class="boss-meta">
+          <div>
+            <div class="boss-title">MENTAL DAMAGE</div>
+            <div class="damage-line">
+              <span class="damage-value"
+                ><span id="damageValue">0</span> / 100,000</span
+              >
+              <span id="rate" class="rate up">+0.289 / sec</span>
+            </div>
+          </div>
+          <div class="wallet-zone">
+            <div>
+              <div class="wallet-pill">
+                <span class="wallet-coin">G</span
+                ><span id="goldValue">0</span> G
+              </div>
+              <div id="goldRateTop" class="wallet-rate">+0.000 G / sec</div>
+            </div>
+            <button id="shopOpen" class="shop-open">상점</button>
+          </div>
+        </div>
+        <div class="bar-shell">
+          <div id="barFill" class="bar-fill"></div>
+          <div id="barText" class="bar-text">0.0%</div>
+        </div>
+      </section>
+
+      <main class="main-grid">
+        <section class="panel left">
+          <div class="panel-header">Study Log</div>
+          <div id="historyPreview" class="history-preview"></div>
+          <button id="historyBtn" class="history-btn">
+            전체 순공 기록 보기
+          </button>
+        </section>
+
+        <section class="panel center">
+          <div class="timer-box">
+            <div class="today-label">오늘의 순공 시간</div>
+            <div id="timer" class="timer">00:00:00</div>
+            <div id="status" class="status">
+              현재 비공부 상태 — 멘탈 도트 데미지 적용 중
+            </div>
+            <div id="activeEffects" class="active-effects"></div>
+            <div class="goal-control">
+              <span class="goal-label">Daily Study Goal</span>
+              <button id="goalBtn" class="goal-btn">
+                일일 순공 목표 <strong id="goalBtnHours">4시간</strong> ▾
+              </button>
+            </div>
+            <div class="controls">
+              <button id="studyBtn" class="primary">공부 시작</button>
+              <button id="resetTodayBtn" class="secondary">
+                오늘 타이머 초기화
+              </button>
+            </div>
+            <div id="balanceInfo" class="micro">밸런스 계산 중...</div>
+          </div>
+        </section>
+
+        <section class="panel right">
+          <div class="panel-header">Mental State</div>
+          <div class="mental-card">
+            <div id="portrait" class="portrait">
+              <div id="face" class="face">😌</div>
+            </div>
+            <div>
+              <div id="grade" class="grade">평온</div>
+              <div id="range" class="range">0 – 9,999 damage</div>
+              <div id="gradeDesc" class="grade-desc">
+                머릿속이 평온하다. "오늘은 공부를 쉬어도 되지 않을까?" 라는
+                생각이 든다. 일말의 죄책감도 느껴지지 않는다.
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span>데이터는 이 브라우저의 localStorage에 자동 저장됩니다.</span>
+        <div class="footer-actions">
+          <span id="saveState">자동 저장 활성</span
+          ><button id="adminOpen" class="admin-open">관리자 패널</button>
+        </div>
+      </footer>
+    </div>
+
+    <dialog id="goalModal" class="goal-dialog">
+      <div class="modal-head">
+        <h2>일일 순공 목표 설정</h2>
+        <button class="close" id="closeGoal">닫기</button>
+      </div>
+      <div class="goal-body">
+        <div class="goal-intro">
+          하루에 확보하고 싶은 순공 시간을 선택해. 목표 시간에 맞춰
+          <b>공부 중 데미지 회복 속도</b>가 자동으로 조정돼.
+        </div>
+        <div class="goal-current">
+          <span>현재 목표</span
+          ><span id="goalCurrentText" class="value">4시간 / 일</span>
+        </div>
+        <div id="goalGrid" class="goal-grid"></div>
+        <div id="goalBalanceText" class="goal-balance"></div>
+      </div>
+    </dialog>
+
+    <dialog id="shopModal" class="shop-dialog">
+      <div class="modal-head">
+        <div>
+          <div
+            style="
+              font:
+                900 11px &quot;Noto Sans KR&quot;,
+                sans-serif;
+              letter-spacing: 0.17em;
+              color: #7f786e;
+              margin-bottom: 5px;
+            "
+          >
+            MENTAL SUPPLY SHOP
+          </div>
+          <h2>멘탈 상점</h2>
+        </div>
+        <button class="close" id="closeShop">닫기</button>
+      </div>
+      <div class="shop-body">
+        <div class="shop-summary">
+          <div class="shop-wallet-card">
+            <div class="shop-card-kicker">My Wallet</div>
+            <div class="shop-wallet-big">
+              <span class="coin">🪙</span><span id="shopGoldValue">0</span> G
+            </div>
+            <div class="shop-rate-line">
+              공부 중일 때 벌 수 있는 재화. 획득한 골드로 유용한 아이템을 구매할
+              수 있다.
+            </div>
+          </div>
+          <div class="shop-rate-card">
+            <div class="shop-card-kicker">Gold Rate by Mental Grade</div>
+            <table class="gold-table" id="goldRateTable"></table>
+          </div>
+        </div>
+
+        <div class="shop-section-title">
+          <h3>구매 가능 아이템</h3>
+          <span></span>
+        </div>
+        <div id="shopGrid" class="shop-grid"></div>
+        <div id="shopMessage" class="shop-message"></div>
+      </div>
+    </dialog>
+
+    <dialog id="historyModal">
+      <div class="modal-head">
+        <h2>순공 시간 기록</h2>
+        <button class="close" id="closeModal">닫기</button>
+      </div>
+      <div class="records" id="records"></div>
+    </dialog>
+
+    <dialog id="adminModal">
+      <div id="adminLoginView" class="admin-login">
+        <div class="modal-head" style="margin: -22px -22px 12px">
+          <h2>관리자 인증</h2>
+          <button class="close" id="closeAdminLogin">닫기</button>
+        </div>
+        <div>테스트 기능을 사용하려면 패스워드를 입력하세요.</div>
+        <input
+          id="adminPassword"
+          type="password"
+          placeholder="Password"
+          autocomplete="off"
+        />
+        <button id="adminLoginBtn" class="admin-btn">접속</button>
+        <div id="adminLoginMsg" class="admin-note"></div>
+      </div>
+      <div id="adminPanelView" style="display: none">
+        <div class="modal-head">
+          <h2>관리자 패널</h2>
+          <button class="close" id="closeAdminPanel">닫기</button>
+        </div>
+        <div class="admin-body">
+          <div class="admin-grid">
+            <div class="admin-card">
+              <h3>누적 데미지</h3>
+              <label>0 ~ 100000</label>
+              <input
+                id="adminDamage"
+                type="number"
+                min="0"
+                max="100000"
+                step="1"
+              />
+              <div class="admin-actions">
+                <button class="admin-btn" data-dmg="-10000">-10,000</button
+                ><button class="admin-btn" data-dmg="-1000">-1,000</button>
+                <button class="admin-btn" data-dmg="1000">+1,000</button
+                ><button class="admin-btn" data-dmg="10000">+10,000</button>
+              </div>
+              <button
+                id="applyDamage"
+                class="admin-btn"
+                style="margin-top: 10px"
+              >
+                값 적용
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>멘탈 등급 바로가기</h3>
+              <label>구간 테스트</label>
+              <select id="gradeJump">
+                <option value="0">평온 (0)</option>
+                <option value="10000">동요 (10,000)</option>
+                <option value="30000">균열 (30,000)</option>
+                <option value="55000">붕괴 (55,000)</option>
+                <option value="80000">멘헤라 (80,000)</option>
+                <option value="100000">MAX (100,000)</option>
+              </select>
+              <button id="jumpGrade" class="admin-btn" style="margin-top: 10px">
+                등급 이동
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>오늘 순공시간</h3>
+              <label>초 단위</label>
+              <input id="adminTodaySeconds" type="number" min="0" step="60" />
+              <div class="admin-actions">
+                <button class="admin-btn" data-time="3600">+1시간</button
+                ><button class="admin-btn" data-time="14400">+4시간</button
+                ><button class="admin-btn" data-time="-3600">-1시간</button>
+              </div>
+              <button
+                id="applyTodaySeconds"
+                class="admin-btn"
+                style="margin-top: 10px"
+              >
+                값 적용
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>상태 테스트</h3>
+              <div class="admin-actions">
+                <button id="forceStudy" class="admin-btn">공부 상태</button
+                ><button id="forceIdle" class="admin-btn">비공부 상태</button>
+              </div>
+              <label style="margin-top: 12px">시간 경과 시뮬레이션</label>
+              <div class="admin-actions">
+                <button class="admin-btn" data-elapsed="60">+1분</button
+                ><button class="admin-btn" data-elapsed="3600">+1시간</button
+                ><button class="admin-btn" data-elapsed="21600">+6시간</button>
+              </div>
+            </div>
+            <div class="admin-card">
+              <h3>골드 테스트</h3>
+              <label>현재 골드</label>
+              <input id="adminGold" type="number" min="0" step="1" />
+              <div class="admin-actions">
+                <button class="admin-btn" data-gold="-10000">-10,000 G</button>
+                <button class="admin-btn" data-gold="10000">+10,000 G</button>
+                <button class="admin-btn" data-gold="50000">+50,000 G</button>
+              </div>
+              <button id="applyGold" class="admin-btn" style="margin-top: 10px">
+                골드 적용
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>회복 부스터 테스트</h3>
+              <div class="admin-note" id="adminBoostStatus">비활성</div>
+              <div class="admin-actions">
+                <button id="adminBoost1h" class="admin-btn">
+                  +1시간 활성화
+                </button>
+                <button id="adminBoost5m" class="admin-btn">+5분 활성화</button>
+                <button id="adminBoostExpire" class="admin-btn">
+                  즉시 만료
+                </button>
+              </div>
+            </div>
+            <div class="admin-card">
+              <h3>오프라인 정산 테스트</h3>
+              <label>가상 오프라인 시간 (분)</label>
+              <input
+                id="adminOfflineMinutes"
+                type="number"
+                min="0"
+                step="1"
+                value="60"
+              />
+              <div class="admin-actions">
+                <button class="admin-btn" data-offline="10">10분</button
+                ><button class="admin-btn" data-offline="60">1시간</button
+                ><button class="admin-btn" data-offline="480">8시간</button
+                ><button class="admin-btn" data-offline="1440">24시간</button>
+              </div>
+              <button
+                id="simulateOffline"
+                class="admin-btn"
+                style="margin-top: 10px"
+              >
+                정산 팝업 테스트
+              </button>
+              <div class="admin-note">
+                현재 공부 상태여도 강제로 종료한 뒤, 전 시간을 비공부 시간으로
+                계산합니다.
+              </div>
+            </div>
+          </div>
+          <div class="admin-note">
+            이 패널은 브라우저 내부 테스트용입니다. 비밀번호도 HTML/JavaScript
+            안에 들어 있으므로 실제 보안 기능으로 사용하면 안 됩니다.
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="offlineModal" class="offline-dialog">
+      <div class="modal-head offline-head">
+        <div>
+          <div class="offline-eyebrow">OFFLINE SETTLEMENT</div>
+          <h2>방치 데미지 정산</h2>
+        </div>
+        <button class="close" id="closeOffline">닫기</button>
+      </div>
+      <div class="offline-body">
+        <div class="offline-hero">
+          <div id="offlineFace" class="offline-face">⏳</div>
+          <div>
+            <div class="offline-title">
+              공부하지 않은 시간이 정산되었습니다.
+            </div>
+            <div class="offline-subtitle">
+              브라우저가 닫혀 있던 동안은 순공 모드가 유지되지 않으므로, 모든
+              경과 시간이 비공부 시간으로 처리됩니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="offline-stats">
+          <div class="offline-stat">
+            <div class="label">부재 시간</div>
+            <div id="offlineElapsed" class="value">00:00:00</div>
+          </div>
+          <div class="offline-stat damage">
+            <div class="label">방치 데미지</div>
+            <div id="offlineDamage" class="value">+0</div>
+          </div>
+          <div class="offline-stat total">
+            <div class="label">정산 후 누적 데미지</div>
+            <div id="offlineTotalDamage" class="value">0 / 100,000</div>
+          </div>
+        </div>
+
+        <div id="offlineGradeChange" class="offline-grade"></div>
+
+        <div class="offline-total-wrap">
+          <div class="offline-total-head">
+            <div class="offline-total-label">Damage Gauge After Settlement</div>
+            <div id="offlineTotalPercent" class="offline-total-value">0.0%</div>
+          </div>
+          <div class="offline-mini-bar">
+            <div id="offlineMiniFill" class="offline-mini-fill"></div>
+          </div>
+        </div>
+
+        <div class="offline-note">
+          장시간 접속하지 않았다면 데미지가 크게 누적될 수 있어.
+          <b>공부 시작</b>을 눌러 회복 루프로 전환해줘.
+        </div>
+
+        <div class="offline-actions">
+          <button id="offlineConfirm" class="history-btn offline-close">
+            확인
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <div id="singleTabOverlay" class="single-tab-overlay" aria-live="polite">
+      <div class="single-tab-card">
+        <div class="single-tab-icon">📚</div>
+        <h2>StudyLog가 다른 탭에서 실행 중이야</h2>
+        <p>순공시간, 데미지, 골드가 서로 덮어쓰이는 것을 막기 위해 한 번에 하나의 탭만 메인 실행권을 가질 수 있어.</p>
+        <div class="single-tab-note">기존 StudyLog 탭을 닫으면 이 화면이 자동으로 해제돼. 비정상 종료된 경우에도 잠시 후 실행권을 다시 확인해.</div>
+        <div class="single-tab-actions"><button id="singleTabCheckBtn" type="button">다시 확인</button></div>
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        const MAX_DAMAGE = 100000;
+        // 비공부 데미지 속도는 고정. 목표 순공시간에 따라 공부 중 회복 속도를 자동 계산한다.
+        // 균형 조건: IDLE_RATE × (24-goal) + STUDY_RATE × goal = 0
+        const IDLE_RATE = 0.289; // damage / sec
+        const DEFAULT_GOAL_HOURS = 4;
+
+        const TAB_LOCK_KEY = "mentalStudyActiveTabV1";
+        const TAB_ID_KEY = "mentalStudyTabIdV1";
+        const TAB_LOCK_TTL = 8000;
+        const TAB_LOCK_HEARTBEAT = 2000;
+
+        // sessionStorage는 같은 탭의 새로고침에서는 유지되고,
+        // 새 탭/새 창에서는 별도의 값을 가진다.
+        // 따라서 실행권을 획득한 뒤 location.reload()되어도 같은 tabId를 유지해야 한다.
+        let tabId = sessionStorage.getItem(TAB_ID_KEY);
+        if (!tabId) {
+          tabId =
+            globalThis.crypto && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          sessionStorage.setItem(TAB_ID_KEY, tabId);
+        }
+
+        function readTabLock() {
+          try { return JSON.parse(localStorage.getItem(TAB_LOCK_KEY) || "null"); } catch { return null; }
+        }
+        function lockIsFresh(lock, now = Date.now()) {
+          return !!(lock && lock.id && Number.isFinite(Number(lock.ts)) && now - Number(lock.ts) < TAB_LOCK_TTL);
+        }
+        function tryAcquireTabLock() {
+          const now = Date.now();
+          const current = readTabLock();
+          if (lockIsFresh(current, now) && current.id !== tabId) return false;
+          localStorage.setItem(TAB_LOCK_KEY, JSON.stringify({ id: tabId, ts: now }));
+          const verified = readTabLock();
+          return !!(verified && verified.id === tabId);
+        }
+        function showSecondaryTabOverlay() {
+          const overlay = document.getElementById("singleTabOverlay");
+          if (overlay) overlay.classList.add("show");
+        }
+        function waitForPrimaryTabToClose() {
+          showSecondaryTabOverlay();
+          const recheck = () => {
+            if (tryAcquireTabLock()) {
+              location.reload();
+            }
+          };
+          const button = document.getElementById("singleTabCheckBtn");
+          if (button) button.addEventListener("click", recheck);
+          window.addEventListener("storage", (event) => { if (event.key === TAB_LOCK_KEY) recheck(); });
+          setInterval(recheck, 2500);
+        }
+        if (!tryAcquireTabLock()) {
+          waitForPrimaryTabToClose();
+          return;
+        }
+
+        const state = JSON.parse(
+          localStorage.getItem("mentalStudyStateV1") || "{}",
+        );
+        let damage = typeof state.damage === "number" ? state.damage : 0;
+        let studying = !!state.studying;
+        let dayKey = state.dayKey || todayKey();
+        let todaySeconds = Number(state.todaySeconds || 0);
+        let records = state.records || {};
+        let lastTs = Number(state.lastTs || Date.now());
+        let goalHours = Math.max(
+          1,
+          Math.min(24, Number(state.goalHours || DEFAULT_GOAL_HOURS)),
+        );
+        let gold = Math.max(0, Number(state.gold || 0));
+        let recoveryBoostUntil = Math.max(
+          0,
+          Number(state.recoveryBoostUntil || 0),
+        );
+
+        function studyRate() {
+          return goalHours >= 24
+            ? 0
+            : (-IDLE_RATE * (24 - goalHours)) / goalHours;
+        }
+
+        function isRecoveryBoostActive(at = Date.now()) {
+          return recoveryBoostUntil > at;
+        }
+        function boostedStudyRate(at = Date.now()) {
+          return studyRate() * (isRecoveryBoostActive(at) ? 2 : 1);
+        }
+        function boosterRemainingMs(at = Date.now()) {
+          return Math.max(0, recoveryBoostUntil - at);
+        }
+        function fmtCountdown(ms) {
+          const total = Math.max(0, Math.ceil(ms / 1000));
+          const h = Math.floor(total / 3600);
+          const m = Math.floor((total % 3600) / 60);
+          const s = total % 60;
+          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        }
+
+        const $ = (id) => document.getElementById(id);
+        const timerEl = $("timer"),
+          damageEl = $("damageValue"),
+          rateEl = $("rate"),
+          barFill = $("barFill"),
+          barText = $("barText");
+        const btn = $("studyBtn"),
+          status = $("status"),
+          gradeEl = $("grade"),
+          descEl = $("gradeDesc"),
+          rangeEl = $("range"),
+          portrait = $("portrait"),
+          face = $("face");
+
+        const grades = [
+          {
+            name: "평온",
+            min: 0,
+            max: 9999,
+            emoji: "😌",
+            color: "#70e6bd",
+            goldRate: 0.08,
+            desc: "아직 머릿속이 조용하다. 공부를 안 해도 죄책감이 직접 공격해오지는 않는 상태.",
+          },
+          {
+            name: "동요",
+            min: 10000,
+            max: 29999,
+            emoji: "😐",
+            color: "#e3d76d",
+            goldRate: 0.05,
+            desc: "해야 할 일이 은근히 신경 쓰인다. 쉬고 있어도 머릿속 한구석에서 미세한 경고음이 울린다.",
+          },
+          {
+            name: "균열",
+            min: 30000,
+            max: 54999,
+            emoji: "😵‍💫",
+            color: "#ffad61",
+            goldRate: 0.03,
+            desc: "집중하지 못한 시간이 체감되기 시작한다. 공부 생각이 반복적으로 침투하고 멘탈에 금이 간다.",
+          },
+          {
+            name: "붕괴",
+            min: 55000,
+            max: 79999,
+            emoji: "😫",
+            color: "#ff657c",
+            goldRate: 0.015,
+            desc: "쉬는 시간에도 마음이 편하지 않다. 순공 시간을 확보하지 않으면 죄의식이 온몸을 옥죄어 올 것 같다.",
+          },
+          {
+            name: "멘헤라",
+            min: 80000,
+            max: 100000,
+            emoji: "🫠",
+            color: "#c175ff",
+            goldRate: 0.005,
+            desc: "누적 데미지 최상위 구간. 나는 사람이 아닌 짐승이다.",
+          },
+        ];
+
+        const SAGE_STATE = {
+          name: "대현자",
+          min: 0,
+          max: 0,
+          emoji: "🧘",
+          color: "#8a74c7",
+          goldRate: grades[0].goldRate * 1.3,
+          desc: "나는 신이다. 공부 중 골드 획득량이 30% 증가한다.",
+        };
+
+        const MAX_STATE = {
+          name: "정신분열",
+          min: MAX_DAMAGE,
+          max: MAX_DAMAGE,
+          emoji: "🫥",
+          color: "#6d5b73",
+          goldRate: grades[grades.length - 1].goldRate,
+          desc: "온전한 정신을 유지하기 힘들다.",
+        };
+
+        const SHOP_ITEMS = [
+          {
+            id: "mental-reset",
+            name: "멘탈 완전회복권",
+            icon: "🩹",
+            tag: "RECOVERY / INSTANT",
+            price: 3000,
+            desc: "누적 데미지를 즉시 0으로 되돌린다. 돌이킬 수 없는 강을 건넌자를 위한 아이템",
+            action() {
+              damage = 0;
+            },
+          },
+          {
+            id: "recovery-boost-1h",
+            name: "집중 회복 부스터",
+            icon: "⚡",
+            tag: "BOOST / 1 HOUR",
+            price: 800,
+            desc: "발동 후 현실시간 1시간 동안 공부 중 멘탈 회복속도가 2배가 된다. 공부를 멈추거나 브라우저를 닫아도 지속시간은 계속 흐른다. 이미 활성화 중이면 1시간이 추가 연장된다.",
+            action() {
+              const now = Date.now();
+              recoveryBoostUntil =
+                Math.max(now, recoveryBoostUntil) + 60 * 60 * 1000;
+            },
+          },
+        ];
+        function todayKey() {
+          const d = new Date();
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        }
+        function rollover() {
+          const now = todayKey();
+          if (now !== dayKey) {
+            records[dayKey] = Math.max(
+              Number(records[dayKey] || 0),
+              todaySeconds,
+            );
+            dayKey = now;
+            todaySeconds = 0;
+          }
+        }
+        function gradeIndexFor(value, direction = 0) {
+          value = Math.max(0, Math.min(MAX_DAMAGE, Number(value) || 0));
+          let idx = 0;
+          for (let i = 0; i < grades.length; i++)
+            if (value >= grades[i].min) idx = i;
+          // 경계에서 아래로 이동할 때는 바로 이전 등급 구간의 획득률을 적용한다.
+          if (
+            direction < 0 &&
+            idx > 0 &&
+            Math.abs(value - grades[idx].min) < 1e-9
+          )
+            idx--;
+          return idx;
+        }
+        function gradeFor(value) {
+          value = Math.max(0, Math.min(MAX_DAMAGE, Number(value) || 0));
+          if (value <= 1e-9) return SAGE_STATE;
+          if (value >= MAX_DAMAGE - 1e-9) return MAX_STATE;
+          return grades[gradeIndexFor(value, 0)];
+        }
+        function goldRateForDamage(value) {
+          return value <= 1e-9
+            ? SAGE_STATE.goldRate
+            : grades[gradeIndexFor(value, 0)].goldRate;
+        }
+
+        function advanceProgress(seconds, damageRate, earnGold = true) {
+          let remaining = Math.max(0, Number(seconds) || 0);
+          let earned = 0;
+          let guard = 0;
+          while (remaining > 1e-7 && guard++ < 32) {
+            const idx = gradeIndexFor(damage, damageRate);
+            const g = grades[idx];
+
+            if (Math.abs(damageRate) < 1e-12) {
+              earned += goldRateForDamage(damage) * remaining;
+              remaining = 0;
+              break;
+            }
+
+            if (damageRate > 0) {
+              if (damage >= MAX_DAMAGE - 1e-9) {
+                damage = MAX_DAMAGE;
+                earned += grades[grades.length - 1].goldRate * remaining;
+                remaining = 0;
+                break;
+              }
+              const boundary =
+                idx < grades.length - 1 ? grades[idx + 1].min : MAX_DAMAGE;
+              const tToBoundary = Math.max(0, (boundary - damage) / damageRate);
+              if (tToBoundary >= remaining || tToBoundary < 1e-12) {
+                if (tToBoundary < 1e-12) {
+                  damage = Math.min(
+                    MAX_DAMAGE,
+                    damage + damageRate * Math.min(remaining, 1e-6),
+                  );
+                  earned += g.goldRate * Math.min(remaining, 1e-6);
+                  remaining -= Math.min(remaining, 1e-6);
+                } else {
+                  earned += g.goldRate * remaining;
+                  damage = Math.min(
+                    MAX_DAMAGE,
+                    damage + damageRate * remaining,
+                  );
+                  remaining = 0;
+                }
+              } else {
+                earned += g.goldRate * tToBoundary;
+                damage = boundary;
+                remaining -= tToBoundary;
+              }
+            } else {
+              if (damage <= 1e-9) {
+                damage = 0;
+                earned += SAGE_STATE.goldRate * remaining;
+                remaining = 0;
+                break;
+              }
+              const boundary = grades[idx].min;
+              const tToBoundary = Math.max(
+                0,
+                (damage - boundary) / -damageRate,
+              );
+              if (tToBoundary >= remaining) {
+                earned += g.goldRate * remaining;
+                damage = Math.max(0, damage + damageRate * remaining);
+                remaining = 0;
+              } else {
+                earned += g.goldRate * tToBoundary;
+                damage = boundary;
+                remaining -= tToBoundary;
+                if (tToBoundary < 1e-12) {
+                  const tiny = Math.min(remaining, 1e-6);
+                  const prev = grades[Math.max(0, idx)];
+                  earned += prev.goldRate * tiny;
+                  damage = Math.max(0, damage + damageRate * tiny);
+                  remaining -= tiny;
+                }
+              }
+            }
+          }
+          damage = Math.max(0, Math.min(MAX_DAMAGE, damage));
+          gold = Math.max(0, gold + (earnGold ? earned : 0));
+          return earnGold ? earned : 0;
+        }
+
+        function applyElapsed() {
+          const now = Date.now();
+          const elapsed = Math.max(0, (now - lastTs) / 1000);
+          rollover();
+
+          if (studying && elapsed > 0) {
+            // 부스터 만료 시점이 경과 구간 안에 있으면 정확히 둘로 나눠 계산한다.
+            if (recoveryBoostUntil > lastTs && recoveryBoostUntil < now) {
+              const boostedSeconds = (recoveryBoostUntil - lastTs) / 1000;
+              const normalSeconds = (now - recoveryBoostUntil) / 1000;
+              advanceProgress(boostedSeconds, studyRate() * 2, true);
+              advanceProgress(normalSeconds, studyRate(), true);
+            } else {
+              const rate = isRecoveryBoostActive(lastTs)
+                ? studyRate() * 2
+                : studyRate();
+              advanceProgress(elapsed, rate, true);
+            }
+            todaySeconds += elapsed;
+          } else if (elapsed > 0) {
+            advanceProgress(elapsed, IDLE_RATE, false);
+          }
+          lastTs = now;
+        }
+        function settleOffline(seconds, showPopup = true) {
+          seconds = Math.max(0, Number(seconds) || 0);
+          const before = damage;
+          const beforeGrade = gradeFor(before);
+          studying = false; // 오프라인에서는 순공 모드가 절대 유지되지 않음
+          rollover();
+          advanceProgress(seconds, IDLE_RATE, false);
+          const applied = damage - before;
+          const afterGrade = gradeFor(damage);
+          lastTs = Date.now();
+          if (showPopup && seconds >= 1) {
+            $("offlineElapsed").textContent = fmt(seconds);
+            $("offlineDamage").textContent =
+              "+" + Math.round(applied).toLocaleString("ko-KR");
+            $("offlineTotalDamage").textContent =
+              `${Math.round(damage).toLocaleString("ko-KR")} / ${MAX_DAMAGE.toLocaleString("ko-KR")}`;
+            const pct = (damage / MAX_DAMAGE) * 100;
+            $("offlineTotalPercent").textContent = `${pct.toFixed(1)}%`;
+            $("offlineMiniFill").style.width = pct + "%";
+            $("offlineMiniFill").style.background =
+              `linear-gradient(90deg, ${afterGrade.color}, ${afterGrade.color}cc)`;
+            $("offlineFace").textContent = afterGrade.emoji;
+            const worsened = beforeGrade.name !== afterGrade.name;
+            const severityText = worsened ? "등급 악화 감지" : "등급 유지";
+            const severityStyle = `color:${worsened ? "#9d4d58" : "#4c7562"};border-color:${worsened ? "#d4a1a8" : "#b8d0c0"};background:${worsened ? "#fff2f4" : "#f2fbf6"};`;
+            $("offlineGradeChange").innerHTML = `
+        <div class="offline-grade-top">
+          <div class="offline-grade-label">MENTAL GRADE UPDATE</div>
+          <div class="offline-severity" style="${severityStyle}">${severityText}</div>
+        </div>
+        <div class="offline-grade-flow">
+          <div class="offline-badge" style="color:${beforeGrade.color}">
+            <span>${beforeGrade.emoji}</span>
+            <div><small>이전</small><br>${beforeGrade.name}</div>
+          </div>
+          <div class="offline-arrow">→</div>
+          <div class="offline-badge" style="color:${afterGrade.color}">
+            <span>${afterGrade.emoji}</span>
+            <div><small>현재</small><br>${afterGrade.name}</div>
+          </div>
+        </div>
+        <div class="offline-grade-summary">
+          ${worsened ? `멘탈 등급이 <b>${beforeGrade.name}</b>에서 <b>${afterGrade.name}</b>으로 악화되었어.` : `멘탈 등급은 <b>${afterGrade.name}</b> 상태를 유지했어.`}
+        </div>`;
+            $("offlineModal").showModal();
+          }
+        }
+        function fmt(sec) {
+          sec = Math.floor(sec);
+          const h = Math.floor(sec / 3600),
+            m = Math.floor((sec % 3600) / 60),
+            s = sec % 60;
+          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        }
+        function currentGrade() {
+          return gradeFor(damage);
+        }
+        function render() {
+          timerEl.textContent = fmt(todaySeconds);
+          damageEl.textContent = Math.round(damage).toLocaleString("ko-KR");
+          const pct = (damage / MAX_DAMAGE) * 100;
+          barFill.style.width = pct + "%";
+          barText.textContent = pct.toFixed(1) + "%";
+          const g = currentGrade();
+          $("goldValue").textContent = Math.floor(gold).toLocaleString("ko-KR");
+          $("goldRateTop").textContent = studying
+            ? `+${g.goldRate.toFixed(3)} G / sec · ${g.name} · 공부 중`
+            : `공부 시작 시 ${g.goldRate.toFixed(3)} G/s`;
+          barFill.style.background = `linear-gradient(90deg, ${g.color}, ${g.color}cc)`;
+          barFill.style.color = g.color;
+          portrait.style.color = g.color;
+          portrait.style.borderColor = g.color + "66";
+          face.textContent = g.emoji;
+          gradeEl.textContent = g.name;
+          gradeEl.style.color = g.color;
+          descEl.textContent = g.desc;
+          rangeEl.textContent =
+            g === SAGE_STATE
+              ? "SPECIAL STATE · damage 0"
+              : g === MAX_STATE
+                ? `SPECIAL STATE · damage ${MAX_DAMAGE.toLocaleString()}`
+                : `${g.min.toLocaleString()} – ${g.max.toLocaleString()} damage`;
+          const effectiveStudyRate = boostedStudyRate();
+          rateEl.textContent = studying
+            ? `${effectiveStudyRate.toFixed(3)} / sec${isRecoveryBoostActive() ? " · BOOST ×2" : ""}`
+            : `+${IDLE_RATE.toFixed(3)} / sec`;
+          rateEl.className = "rate " + (studying ? "down" : "up");
+
+          const effects = [];
+          if (g === SAGE_STATE) {
+            effects.push(
+              `<div class="effect-chip">🧘 대현자 · 공부 중 골드 +30%</div>`,
+            );
+          }
+          if (isRecoveryBoostActive()) {
+            effects.push(
+              `<div class="effect-chip boost">⚡ 회복속도 ×2 <span class="effect-time">${fmtCountdown(boosterRemainingMs())}</span></div>`,
+            );
+          }
+          $("activeEffects").innerHTML = effects.join("");
+          btn.textContent = studying ? "공부 종료" : "공부 시작";
+          btn.classList.toggle("active", studying);
+          status.textContent = studying
+            ? g === SAGE_STATE
+              ? "대현자 집중 모드 — 데미지 0 유지 / 골드 획득 +30%"
+              : g === MAX_STATE
+                ? "정신분열 상태 — 공부 중 / 최대 데미지에서 회복 중"
+                : "집중 모드 — 순공시간 증가 / 멘탈 데미지 회복 중"
+            : g === SAGE_STATE
+              ? "대현자 상태 — 현재 데미지 0"
+              : g === MAX_STATE
+                ? "정신분열 상태 — 누적 데미지 MAX"
+                : "현재 비공부 상태 — 멘탈 도트 데미지 적용 중";
+          $("goalBtnHours").textContent = `${goalHours}시간`;
+          const restHours = 24 - goalHours;
+          const ratio = goalHours >= 24 ? 0 : restHours / goalHours;
+          $("balanceInfo").innerHTML =
+            goalHours >= 24
+              ? `밸런스 기준: 하루 <b>24시간 공부</b> 목표에서는 비공부 시간이 0시간이므로 공부 중 데미지 변화량은 <b>0 / sec</b>로 설정됩니다.`
+              : `밸런스 기준: 하루 ${restHours}시간 비공부 + <b>${goalHours}시간 공부</b> 시 누적 데미지 순변화 ≈ 0<br>현재 기본 회복 속도: <b>${studyRate().toFixed(3)} / sec</b> (비공부 데미지의 ${ratio.toFixed(2)}배)${isRecoveryBoostActive() ? `<br>⚡ 부스터 활성 중: 공부 시 <b>${(studyRate() * 2).toFixed(3)} / sec</b>` : ""}`;
+          renderHistory();
+        }
+        function save() {
+          records[dayKey] = Math.max(
+            Number(records[dayKey] || 0),
+            todaySeconds,
+          );
+          localStorage.setItem(
+            "mentalStudyStateV1",
+            JSON.stringify({
+              damage,
+              studying,
+              dayKey,
+              todaySeconds,
+              records,
+              lastTs,
+              goalHours,
+              gold,
+              recoveryBoostUntil,
+            }),
+          );
+          $("saveState").textContent =
+            "마지막 저장 " +
+            new Date().toLocaleTimeString("ko-KR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            });
+        }
+        function renderHistory() {
+          const all = {
+            ...records,
+            [dayKey]: Math.max(Number(records[dayKey] || 0), todaySeconds),
+          };
+          const items = Object.entries(all).sort((a, b) =>
+            b[0].localeCompare(a[0]),
+          );
+          const preview = items.slice(0, 5);
+          $("historyPreview").innerHTML = preview.length
+            ? preview
+                .map(
+                  ([d, s]) =>
+                    `<div class="history-item"><div class="date">${d}${d === dayKey ? " · TODAY" : ""}</div><div class="time">${fmt(s)}</div></div>`,
+                )
+                .join("")
+            : `<div class="history-empty">아직 기록이 없습니다.<br>공부 시작 버튼을 누르면 첫 기록이 생성됩니다.</div>`;
+        }
+        function fillModal() {
+          const all = {
+            ...records,
+            [dayKey]: Math.max(Number(records[dayKey] || 0), todaySeconds),
+          };
+          const items = Object.entries(all).sort((a, b) =>
+            b[0].localeCompare(a[0]),
+          );
+          $("records").innerHTML =
+            (items.length
+              ? items
+                  .map(
+                    ([d, s]) =>
+                      `<div class="record-row"><div class="record-date">${d}${d === dayKey ? " · 오늘" : ""}</div><div class="record-time">${fmt(s)}</div></div>`,
+                  )
+                  .join("")
+              : `<div class="history-empty">기록 없음</div>`) +
+            `<div class="danger-zone"><button class="reset-link" id="resetAll">전체 데이터 초기화</button></div>`;
+          $("resetAll").onclick = () => {
+            if (confirm("정말 모든 기록과 데미지를 초기화할까요?")) {
+              localStorage.removeItem("mentalStudyStateV1");
+              location.reload();
+            }
+          };
+        }
+
+        function renderShop() {
+          $("shopGoldValue").textContent =
+            Math.floor(gold).toLocaleString("ko-KR");
+          $("goldRateTable").innerHTML =
+            `<tr><th>멘탈 등급</th><th>초당 골드</th></tr>` +
+            [SAGE_STATE, ...grades, MAX_STATE]
+              .map(
+                (x) =>
+                  `<tr><td><span style="color:${x.color};font-weight:900">${x.emoji} ${x.name}</span></td><td>+${x.goldRate.toFixed(3)} G/s${x === SAGE_STATE ? " · +30%" : ""}</td></tr>`,
+              )
+              .join("");
+
+          $("shopGrid").innerHTML = SHOP_ITEMS.map((item) => {
+            const price = item.price;
+            const affordable = gold >= price;
+            return `<div class="shop-item">
+        <div class="shop-icon">${item.icon}</div>
+        <div class="shop-item-name">${item.name}</div>
+        <div class="shop-item-tag">${item.tag}</div>
+        <div class="shop-item-desc">${item.desc}
+          ${
+            item.id === "recovery-boost-1h" && isRecoveryBoostActive()
+              ? `<br><br><b>⚡ 현재 활성 중 · 남은 시간 ${fmtCountdown(boosterRemainingMs())}</b>`
+              : ""
+          }
+        </div>
+        <div class="shop-item-footer">
+          <div class="shop-price">${price.toLocaleString("ko-KR")} G</div>
+          <button class="buy-btn" data-buy="${item.id}" ${affordable ? "" : "disabled"}>${affordable ? "구매" : "골드 부족"}</button>
+        </div>
+      </div>`;
+          }).join("");
+
+          document.querySelectorAll("[data-buy]").forEach((b) =>
+            b.addEventListener("click", () => {
+              const item = SHOP_ITEMS.find((x) => x.id === b.dataset.buy);
+              if (!item) return;
+              applyElapsed();
+              const price = item.price;
+              if (gold < price) {
+                showShopMessage(
+                  "골드가 부족해. 멘탈 등급을 좋은 상태로 유지하면 더 빠르게 모을 수 있어.",
+                  false,
+                );
+                renderShop();
+                render();
+                return;
+              }
+              if (
+                !confirm(
+                  `${item.name}을 ${price.toLocaleString("ko-KR")} G에 구매해서 즉시 사용할까?`,
+                )
+              )
+                return;
+              gold -= price;
+              item.action();
+              save();
+              render();
+              renderShop();
+              const successText =
+                item.id === "mental-reset"
+                  ? `${item.name} 사용 완료! 누적 데미지가 0으로 회복됐어.`
+                  : `${item.name} 발동! 앞으로 ${fmtCountdown(boosterRemainingMs())} 동안 공부 중 멘탈 회복속도가 2배야.`;
+              showShopMessage(successText, true);
+            }),
+          );
+        }
+        function showShopMessage(message, ok = true) {
+          const el = $("shopMessage");
+          el.textContent = message;
+          el.className = `shop-message show ${ok ? "ok" : "bad"}`;
+        }
+        $("shopOpen").addEventListener("click", () => {
+          applyElapsed();
+          render();
+          renderShop();
+          $("shopMessage").className = "shop-message";
+          $("shopModal").showModal();
+        });
+        $("closeShop").addEventListener("click", () => $("shopModal").close());
+        $("shopModal").addEventListener("click", (e) => {
+          if (e.target === $("shopModal")) $("shopModal").close();
+        });
+
+        function renderGoalOptions() {
+          $("goalGrid").innerHTML = Array.from({ length: 24 }, (_, i) => i + 1)
+            .map(
+              (h) =>
+                `<button class="goal-option ${h === goalHours ? "selected" : ""}" data-goal="${h}">${h}h</button>`,
+            )
+            .join("");
+          $("goalCurrentText").textContent = `${goalHours}시간 / 일`;
+          const rest = 24 - goalHours;
+          $("goalBalanceText").innerHTML =
+            goalHours >= 24
+              ? `24시간 목표에서는 하루 비공부 시간이 0시간이므로, 균형을 위해 공부 중 데미지 변화량이 <b>0 / sec</b>가 됩니다.`
+              : `하루 ${rest}시간 동안의 비공부 데미지를 ${goalHours}시간 공부로 상쇄하도록 회복 속도를 <b>${studyRate().toFixed(3)} / sec</b>로 자동 설정합니다.`;
+          document.querySelectorAll("[data-goal]").forEach((el) =>
+            el.addEventListener("click", () => {
+              applyElapsed();
+              goalHours = Number(el.dataset.goal);
+              save();
+              render();
+              renderGoalOptions();
+            }),
+          );
+        }
+        $("goalBtn").addEventListener("click", () => {
+          renderGoalOptions();
+          $("goalModal").showModal();
+        });
+        $("closeGoal").addEventListener("click", () => $("goalModal").close());
+        $("goalModal").addEventListener("click", (e) => {
+          if (e.target === $("goalModal")) $("goalModal").close();
+        });
+
+        btn.addEventListener("click", () => {
+          applyElapsed();
+          studying = !studying;
+          save();
+          render();
+        });
+        $("resetTodayBtn").addEventListener("click", () => {
+          if (confirm("오늘의 순공 타이머만 0으로 초기화할까요?")) {
+            applyElapsed();
+            todaySeconds = 0;
+            records[dayKey] = 0;
+            save();
+            render();
+          }
+        });
+        $("historyBtn").addEventListener("click", () => {
+          fillModal();
+          $("historyModal").showModal();
+        });
+        $("closeModal").addEventListener("click", () =>
+          $("historyModal").close(),
+        );
+        $("historyModal").addEventListener("click", (e) => {
+          if (e.target === $("historyModal")) $("historyModal").close();
+        });
+        $("closeOffline").addEventListener("click", () =>
+          $("offlineModal").close(),
+        );
+        $("offlineConfirm").addEventListener("click", () =>
+          $("offlineModal").close(),
+        );
+        $("offlineModal").addEventListener("click", (e) => {
+          if (e.target === $("offlineModal")) $("offlineModal").close();
+        });
+
+        // 관리자 패널
+        const ADMIN_PASSWORD = "studylogadmin";
+        const adminModal = $("adminModal");
+        function syncAdminFields() {
+          $("adminDamage").value = Math.round(damage);
+          $("adminTodaySeconds").value = Math.floor(todaySeconds);
+          $("adminGold").value = Math.floor(gold);
+          if ($("adminBoostStatus"))
+            $("adminBoostStatus").textContent = isRecoveryBoostActive()
+              ? `활성 · 남은 시간 ${fmtCountdown(boosterRemainingMs())}`
+              : "비활성";
+        }
+        function openAdminLogin() {
+          $("adminLoginView").style.display = "block";
+          $("adminPanelView").style.display = "none";
+          $("adminPassword").value = "";
+          $("adminLoginMsg").textContent = "";
+          adminModal.showModal();
+          setTimeout(() => $("adminPassword").focus(), 50);
+        }
+        function unlockAdmin() {
+          if ($("adminPassword").value === ADMIN_PASSWORD) {
+            $("adminLoginView").style.display = "none";
+            $("adminPanelView").style.display = "block";
+            syncAdminFields();
+          } else
+            $("adminLoginMsg").textContent = "패스워드가 올바르지 않습니다.";
+        }
+        $("adminOpen").addEventListener("click", openAdminLogin);
+        $("adminLoginBtn").addEventListener("click", unlockAdmin);
+        $("adminPassword").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") unlockAdmin();
+        });
+        $("closeAdminLogin").addEventListener("click", () =>
+          adminModal.close(),
+        );
+        $("closeAdminPanel").addEventListener("click", () =>
+          adminModal.close(),
+        );
+        adminModal.addEventListener("click", (e) => {
+          if (e.target === adminModal) adminModal.close();
+        });
+        $("adminBoost1h").addEventListener("click", () => {
+          applyElapsed();
+          recoveryBoostUntil =
+            Math.max(Date.now(), recoveryBoostUntil) + 3600000;
+          save();
+          render();
+          syncAdminFields();
+        });
+        $("adminBoost5m").addEventListener("click", () => {
+          applyElapsed();
+          recoveryBoostUntil =
+            Math.max(Date.now(), recoveryBoostUntil) + 300000;
+          save();
+          render();
+          syncAdminFields();
+        });
+        $("adminBoostExpire").addEventListener("click", () => {
+          applyElapsed();
+          recoveryBoostUntil = 0;
+          save();
+          render();
+          syncAdminFields();
+        });
+        $("applyGold").addEventListener("click", () => {
+          applyElapsed();
+          gold = Math.max(0, Number($("adminGold").value) || 0);
+          save();
+          render();
+          syncAdminFields();
+        });
+        document.querySelectorAll("[data-gold]").forEach((b) =>
+          b.addEventListener("click", () => {
+            applyElapsed();
+            gold = Math.max(0, gold + Number(b.dataset.gold));
+            save();
+            render();
+            syncAdminFields();
+          }),
+        );
+        $("applyDamage").addEventListener("click", () => {
+          applyElapsed();
+          damage = Math.max(
+            0,
+            Math.min(MAX_DAMAGE, Number($("adminDamage").value) || 0),
+          );
+          save();
+          render();
+          syncAdminFields();
+        });
+        document.querySelectorAll("[data-dmg]").forEach((b) =>
+          b.addEventListener("click", () => {
+            applyElapsed();
+            damage = Math.max(
+              0,
+              Math.min(MAX_DAMAGE, damage + Number(b.dataset.dmg)),
+            );
+            save();
+            render();
+            syncAdminFields();
+          }),
+        );
+        $("jumpGrade").addEventListener("click", () => {
+          applyElapsed();
+          damage = Number($("gradeJump").value);
+          save();
+          render();
+          syncAdminFields();
+        });
+        $("applyTodaySeconds").addEventListener("click", () => {
+          applyElapsed();
+          todaySeconds = Math.max(0, Number($("adminTodaySeconds").value) || 0);
+          records[dayKey] = todaySeconds;
+          save();
+          render();
+          syncAdminFields();
+        });
+        document.querySelectorAll("[data-time]").forEach((b) =>
+          b.addEventListener("click", () => {
+            applyElapsed();
+            todaySeconds = Math.max(0, todaySeconds + Number(b.dataset.time));
+            records[dayKey] = todaySeconds;
+            save();
+            render();
+            syncAdminFields();
+          }),
+        );
+        $("forceStudy").addEventListener("click", () => {
+          applyElapsed();
+          studying = true;
+          save();
+          render();
+          syncAdminFields();
+        });
+        $("forceIdle").addEventListener("click", () => {
+          applyElapsed();
+          studying = false;
+          save();
+          render();
+          syncAdminFields();
+        });
+        document.querySelectorAll("[data-elapsed]").forEach((b) =>
+          b.addEventListener("click", () => {
+            const sec = Number(b.dataset.elapsed);
+            if (studying) {
+              advanceProgress(
+                sec,
+                isRecoveryBoostActive() ? studyRate() * 2 : studyRate(),
+                true,
+              );
+            } else {
+              advanceProgress(sec, IDLE_RATE, false);
+            }
+            if (studying) todaySeconds += sec;
+            records[dayKey] = Math.max(
+              Number(records[dayKey] || 0),
+              todaySeconds,
+            );
+            save();
+            render();
+            syncAdminFields();
+          }),
+        );
+        document.querySelectorAll("[data-offline]").forEach((b) =>
+          b.addEventListener("click", () => {
+            $("adminOfflineMinutes").value = Number(b.dataset.offline);
+          }),
+        );
+        $("simulateOffline").addEventListener("click", () => {
+          applyElapsed();
+          const minutes = Math.max(
+            0,
+            Number($("adminOfflineMinutes").value) || 0,
+          );
+          settleOffline(minutes * 60, true);
+          save();
+          render();
+          syncAdminFields();
+        });
+
+        // 재접속 정산: 마지막 저장 이후의 시간은 항상 비공부 시간으로 계산한다.
+        // 이전 세션에서 공부 중이었다 하더라도 페이지가 다시 열리면 자동 종료된다.
+        const startupNow = Date.now();
+        const offlineElapsed = Math.max(0, (startupNow - lastTs) / 1000);
+        studying = false;
+        if (offlineElapsed >= 1) settleOffline(offlineElapsed, true);
+        else lastTs = startupNow;
+        render();
+        save();
+
+        setInterval(() => {
+          applyElapsed();
+          render();
+        }, 250);
+        setInterval(save, 5000);
+
+        const tabLockHeartbeat = setInterval(() => {
+          const current = readTabLock();
+          if (current && current.id !== tabId && lockIsFresh(current)) {
+            clearInterval(tabLockHeartbeat);
+            location.reload();
+            return;
+          }
+          localStorage.setItem(TAB_LOCK_KEY, JSON.stringify({ id: tabId, ts: Date.now() }));
+        }, TAB_LOCK_HEARTBEAT);
+
+        window.addEventListener("storage", (event) => {
+          if (event.key !== TAB_LOCK_KEY || !event.newValue) return;
+          try {
+            const incoming = JSON.parse(event.newValue);
+            if (incoming.id !== tabId && lockIsFresh(incoming)) location.reload();
+          } catch {}
+        });
+        window.addEventListener("beforeunload", () => {
+          applyElapsed();
+          studying = false; // 창 닫기/새로고침 시 공부 모드 자동 종료
+          lastTs = Date.now();
+          save();
+          const current = readTabLock();
+          if (current && current.id === tabId) localStorage.removeItem(TAB_LOCK_KEY);
+        });
+        document.addEventListener("visibilitychange", () => {
+          // 단순 탭 전환/최소화는 공부 모드를 끄지 않는다. 실제 unload 시에만 자동 종료.
+          if (document.hidden) {
+            applyElapsed();
+            save();
+          } else {
+            applyElapsed();
+            render();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
