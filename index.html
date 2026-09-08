@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menhera's StudyLog</title>
+
+    <meta name="description" content="멘탈 데미지와 싸우는 순공 타이머" />
+    <meta name="application-name" content="Menhera's StudyLog" />
+    <meta name="theme-color" content="#f7f5ef" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mental.study-log.kro.kr/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Menhera's StudyLog" />
+    <meta property="og:title" content="Menhera's StudyLog" />
+    <meta
+      property="og:description"
+      content="멘탈 데미지와 싸우는 순공 타이머"
+    />
+    <meta property="og:url" content="https://mental.study-log.kro.kr/" />
+    <meta
+      property="og:image"
+      content="https://mental.study-log.kro.kr/assets/share/og-thumbnail.png"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://mental.study-log.kro.kr/assets/share/og-thumbnail.png"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Menhera's StudyLog에서 넋이 나간 표정으로 책상에 엎드려 공부하는 캐릭터"
+    />
+    <meta property="og:locale" content="ko_KR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Menhera's StudyLog" />
+    <meta
+      name="twitter:description"
+      content="멘탈 데미지와 싸우는 순공 타이머"
+    />
+    <meta
+      name="twitter:image"
+      content="https://mental.study-log.kro.kr/assets/share/og-thumbnail.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="Menhera's StudyLog에서 넋이 나간 표정으로 책상에 엎드려 공부하는 캐릭터"
+    />
+
+    <link rel="icon" type="image/png" href="assets/ui/book.png" />
+    <link rel="apple-touch-icon" href="assets/ui/book.png" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <div class="utility-menu-wrap">
+      <button
+        id="utilityMenuToggle"
+        class="utility-menu-toggle"
+        type="button"
+        aria-label="메뉴 열기"
+        aria-expanded="false"
+      >
+        <img src="assets/ui/menu.png" alt="" class="ui-icon menu-toggle-icon" />
+      </button>
+
+      <div id="utilityMenuPanel" class="utility-menu-panel" role="menu">
+        <div class="utility-menu-title">MENHERA'S STUDYLOG MENU</div>
+        <button
+          id="shareOpen"
+          class="utility-menu-item"
+          type="button"
+          role="menuitem"
+        >
+          <span class="utility-menu-icon"
+            ><img src="assets/ui/share.png" alt="" class="ui-icon"
+          /></span>
+          <span>공유</span>
+        </button>
+
+        <button
+          id="patchOpen"
+          class="utility-menu-item"
+          type="button"
+          role="menuitem"
+        >
+          <span class="utility-menu-icon" aria-hidden="true">📝</span>
+          <span>패치내역</span>
+        </button>
+
+        <button
+          id="adminMenuOpen"
+          class="utility-menu-item admin-menu-item-hidden"
+          type="button"
+          role="menuitem"
+          aria-hidden="true"
+        >
+          <span class="utility-menu-icon" aria-hidden="true">🛠️</span>
+          <span>관리자 메뉴</span>
+        </button>
+        <button
+          id="helpOpen"
+          class="utility-menu-item"
+          type="button"
+          role="menuitem"
+        >
+          <span class="utility-menu-icon"
+            ><img src="assets/ui/help.png" alt="" class="ui-icon"
+          /></span>
+          <span>도움말</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="app">
+      <section class="boss-wrap">
+        <div class="boss-meta">
+          <div>
+            <div class="boss-title">MENTAL DAMAGE</div>
+            <div class="damage-line">
+              <span class="damage-value"
+                ><span id="damageValue">0</span> / 100,000</span
+              >
+              <span id="rate" class="rate up">+0.289 / sec</span>
+            </div>
+          </div>
+          <div class="wallet-zone">
+            <div>
+              <div class="wallet-pill">
+                <span class="wallet-coin"
+                  ><img
+                    src="assets/ui/coin.png"
+                    alt=""
+                    class="ui-icon wallet-coin-img" /></span
+                ><span id="goldValue">0</span> G
+              </div>
+            </div>
+            <button id="shopOpen" class="shop-open">
+              <img
+                src="assets/ui/shop.png"
+                alt=""
+                class="ui-icon button-icon"
+              />상점
+            </button>
+          </div>
+        </div>
+        <div class="bar-shell">
+          <div id="barFill" class="bar-fill"></div>
+          <div id="barText" class="bar-text">0.0%</div>
+        </div>
+      </section>
+
+      <main class="main-grid">
+        <section class="panel left">
+          <div class="panel-header">Study Log</div>
+          <div id="historyPreview" class="history-preview"></div>
+          <button id="historyBtn" class="history-btn">
+            전체 순공 기록 보기
+          </button>
+        </section>
+
+        <section class="panel center">
+          <div class="timer-box">
+            <div class="today-label">오늘의 순공 시간</div>
+            <div id="timer" class="timer">00:00:00</div>
+            <div id="status" class="status">
+              현재 비공부 상태 — 멘탈 데미지 적용 중
+            </div>
+            <div id="activeEffects" class="active-effects"></div>
+            <div class="goal-control">
+              <span class="goal-label">Daily Study Goal</span>
+              <button id="goalBtn" class="goal-btn">
+                일일 순공 목표 <strong id="goalBtnHours">4시간</strong> ▾
+              </button>
+            </div>
+            <div class="controls">
+              <button id="studyBtn" class="primary">공부 시작</button>
+              <button id="resetTodayBtn" class="secondary">
+                오늘 타이머 초기화
+              </button>
+            </div>
+            <div id="balanceInfo" class="micro">밸런스 계산 중...</div>
+          </div>
+        </section>
+
+        <section class="panel right">
+          <div class="panel-header">Mental State</div>
+          <div class="mental-card">
+            <div id="portrait" class="portrait">
+              <div id="face" class="face" aria-hidden="true"></div>
+            </div>
+            <div>
+              <div id="grade" class="grade">평온</div>
+              <div id="range" class="range">0 – 9,999 damage</div>
+              <div id="gradeDesc" class="grade-desc">
+                머릿속이 평온하다. "오늘은 공부를 쉬어도 되지 않을까?" 라는
+                생각이 든다. 일말의 죄책감도 느껴지지 않는다.
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span>데이터는 이 브라우저의 localStorage에 자동 저장됩니다.</span>
+        <div class="footer-actions">
+          <button
+            id="saveState"
+            class="admin-secret-trigger"
+            type="button"
+            tabindex="-1"
+          >
+            자동 저장 활성
+          </button>
+        </div>
+      </footer>
+    </div>
+
+    <dialog id="goalModal" class="goal-dialog">
+      <div class="modal-head">
+        <h2>일일 순공 목표 설정</h2>
+        <button class="close" id="closeGoal">닫기</button>
+      </div>
+      <div class="goal-body">
+        <div class="goal-intro">
+          하루에 확보하고 싶은 순공 시간을 선택해. 목표 시간에 맞춰
+          <b>공부 중 데미지 회복 속도</b>가 자동으로 조정돼.
+        </div>
+        <div class="goal-current">
+          <span>현재 목표</span
+          ><span id="goalCurrentText" class="value">4시간 / 일</span>
+        </div>
+        <div id="goalGrid" class="goal-grid"></div>
+        <div id="goalBalanceText" class="goal-balance"></div>
+      </div>
+    </dialog>
+
+    <dialog id="shopModal" class="shop-dialog">
+      <div class="modal-head">
+        <div>
+          <div
+            style="
+              font:
+                900 11px &quot;Noto Sans KR&quot;,
+                sans-serif;
+              letter-spacing: 0.17em;
+              color: #7f786e;
+              margin-bottom: 5px;
+            "
+          >
+            MENTAL SUPPLY SHOP
+          </div>
+          <h2>멘탈 상점</h2>
+        </div>
+        <button class="close" id="closeShop">닫기</button>
+      </div>
+      <div class="shop-body">
+        <div class="shop-summary">
+          <div class="shop-wallet-card">
+            <div class="shop-card-kicker">My Wallet</div>
+            <div class="shop-wallet-big">
+              <span class="coin"
+                ><img
+                  src="assets/ui/coin.png"
+                  alt=""
+                  class="ui-icon shop-coin-img" /></span
+              ><span id="shopGoldValue">0</span> G
+            </div>
+            <div class="shop-rate-line">
+              공부 중일 때 벌 수 있는 재화. 획득한 골드로 유용한 아이템을 구매할
+              수 있다.
+            </div>
+          </div>
+          <div class="shop-rate-card">
+            <div class="shop-card-kicker">Gold Rate by Mental Grade</div>
+            <table class="gold-table" id="goldRateTable"></table>
+          </div>
+        </div>
+
+        <div class="shop-section-title">
+          <h3>구매 가능 아이템</h3>
+          <span></span>
+        </div>
+        <div id="shopGrid" class="shop-grid"></div>
+        <div id="shopMessage" class="shop-message"></div>
+      </div>
+    </dialog>
+
+    <dialog id="historyModal">
+      <div class="modal-head">
+        <h2>순공 시간 기록</h2>
+        <button class="close" id="closeModal">닫기</button>
+      </div>
+      <div class="records" id="records"></div>
+      <input
+        id="studyDataImportInput"
+        type="file"
+        accept=".json,application/json"
+        hidden
+      />
+    </dialog>
+
+    <dialog id="adminModal">
+      <div id="adminPanelView">
+        <div class="modal-head">
+          <h2>관리자 패널</h2>
+          <button class="close" id="closeAdminPanel">닫기</button>
+        </div>
+        <div class="admin-body">
+          <div class="admin-grid">
+            <div class="admin-card">
+              <h3>누적 데미지</h3>
+              <label>0 ~ 100000</label>
+              <input
+                id="adminDamage"
+                type="number"
+                min="0"
+                max="100000"
+                step="1"
+              />
+              <div class="admin-actions">
+                <button class="admin-btn" data-dmg="-10000">-10,000</button
+                ><button class="admin-btn" data-dmg="-1000">-1,000</button>
+                <button class="admin-btn" data-dmg="1000">+1,000</button
+                ><button class="admin-btn" data-dmg="10000">+10,000</button>
+              </div>
+              <button
+                id="applyDamage"
+                class="admin-btn"
+                style="margin-top: 10px"
+              >
+                값 적용
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>멘탈 등급 바로가기</h3>
+              <label>구간 테스트</label>
+              <select id="gradeJump">
+                <option value="0">평온 (0)</option>
+                <option value="10000">동요 (10,000)</option>
+                <option value="30000">균열 (30,000)</option>
+                <option value="55000">붕괴 (55,000)</option>
+                <option value="80000">멘헤라 (80,000)</option>
+                <option value="100000">MAX (100,000)</option>
+              </select>
+              <button id="jumpGrade" class="admin-btn" style="margin-top: 10px">
+                등급 이동
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>오늘 순공시간</h3>
+              <label>초 단위</label>
+              <input id="adminTodaySeconds" type="number" min="0" step="60" />
+              <div class="admin-actions">
+                <button class="admin-btn" data-time="3600">+1시간</button
+                ><button class="admin-btn" data-time="14400">+4시간</button
+                ><button class="admin-btn" data-time="-3600">-1시간</button>
+              </div>
+              <button
+                id="applyTodaySeconds"
+                class="admin-btn"
+                style="margin-top: 10px"
+              >
+                값 적용
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>상태 테스트</h3>
+              <div class="admin-actions">
+                <button id="forceStudy" class="admin-btn">공부 상태</button
+                ><button id="forceIdle" class="admin-btn">비공부 상태</button>
+              </div>
+              <label style="margin-top: 12px">시간 경과 시뮬레이션</label>
+              <div class="admin-actions">
+                <button class="admin-btn" data-elapsed="60">+1분</button
+                ><button class="admin-btn" data-elapsed="3600">+1시간</button
+                ><button class="admin-btn" data-elapsed="21600">+6시간</button>
+              </div>
+            </div>
+            <div class="admin-card">
+              <h3>골드 테스트</h3>
+              <label>현재 골드</label>
+              <input id="adminGold" type="number" min="0" step="1" />
+              <div class="admin-actions">
+                <button class="admin-btn" data-gold="-10000">-10,000 G</button>
+                <button class="admin-btn" data-gold="10000">+10,000 G</button>
+                <button class="admin-btn" data-gold="50000">+50,000 G</button>
+              </div>
+              <button id="applyGold" class="admin-btn" style="margin-top: 10px">
+                골드 적용
+              </button>
+            </div>
+            <div class="admin-card">
+              <h3>회복 부스터 테스트</h3>
+              <div class="admin-note" id="adminBoostStatus">비활성</div>
+              <div class="admin-actions">
+                <button id="adminBoost1h" class="admin-btn">
+                  +1시간 활성화
+                </button>
+                <button id="adminBoost5m" class="admin-btn">+5분 활성화</button>
+                <button id="adminBoostExpire" class="admin-btn">
+                  즉시 만료
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <h3>멘탈 변화 그래프 더미 데이터</h3>
+              <label>생성할 최근 기간 (일)</label>
+              <input
+                id="adminDummyDamageDays"
+                type="number"
+                min="2"
+                max="90"
+                step="1"
+                value="14"
+              />
+              <div class="admin-actions">
+                <button id="generateDummyDamage" class="admin-btn">
+                  최근 N일 더미 생성
+                </button>
+              </div>
+              <div class="admin-note" id="adminDummyDamageMsg">
+                그래프 테스트용입니다. 선택한 기간의 멘탈 변화 기록을 더미
+                값으로 덮어씁니다.
+              </div>
+            </div>
+            <div class="admin-card">
+              <h3>오프라인 정산 테스트</h3>
+              <label>가상 오프라인 시간 (분)</label>
+              <input
+                id="adminOfflineMinutes"
+                type="number"
+                min="0"
+                step="1"
+                value="60"
+              />
+              <div class="admin-actions">
+                <button class="admin-btn" data-offline="10">10분</button
+                ><button class="admin-btn" data-offline="60">1시간</button
+                ><button class="admin-btn" data-offline="480">8시간</button
+                ><button class="admin-btn" data-offline="1440">24시간</button>
+              </div>
+              <button
+                id="simulateOffline"
+                class="admin-btn"
+                style="margin-top: 10px"
+              >
+                정산 팝업 테스트
+              </button>
+              <div class="admin-note">
+                현재 공부 상태여도 강제로 종료한 뒤, 전 시간을 비공부 시간으로
+                계산합니다.
+              </div>
+            </div>
+          </div>
+          <div class="admin-note">
+            이 패널은 브라우저 내부 테스트용입니다. 비밀번호도 HTML/JavaScript
+            안에 들어 있으므로 실제 보안 기능으로 사용하면 안 됩니다.
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="offlineModal" class="offline-dialog">
+      <div class="modal-head offline-head">
+        <div>
+          <div class="offline-eyebrow">OFFLINE SETTLEMENT</div>
+          <h2>방치 데미지 정산</h2>
+        </div>
+        <button class="close" id="closeOffline">닫기</button>
+      </div>
+      <div class="offline-body">
+        <div class="offline-hero">
+          <div id="offlineFace" class="offline-face">
+            <img
+              src="assets/ui/offline.png"
+              alt=""
+              class="ui-icon offline-initial-icon"
+            />
+          </div>
+          <div>
+            <div class="offline-title">
+              공부하지 않은 시간이 정산되었습니다.
+            </div>
+            <div class="offline-subtitle">
+              브라우저가 닫혀 있던 동안은 순공 모드가 유지되지 않으므로, 모든
+              경과 시간이 비공부 시간으로 처리됩니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="offline-stats">
+          <div class="offline-stat">
+            <div class="label">부재 시간</div>
+            <div id="offlineElapsed" class="value">00:00:00</div>
+          </div>
+          <div class="offline-stat damage">
+            <div class="label">방치 데미지</div>
+            <div id="offlineDamage" class="value">+0</div>
+          </div>
+          <div class="offline-stat total">
+            <div class="label">정산 후 누적 데미지</div>
+            <div id="offlineTotalDamage" class="value">0 / 100,000</div>
+          </div>
+        </div>
+
+        <div class="offline-total-wrap">
+          <div class="offline-total-head">
+            <div class="offline-total-label">Damage Gauge After Settlement</div>
+            <div id="offlineTotalPercent" class="offline-total-value">0.0%</div>
+          </div>
+          <div class="offline-mini-bar">
+            <div id="offlineMiniFill" class="offline-mini-fill"></div>
+          </div>
+        </div>
+
+        <div class="offline-note">
+          장시간 접속하지 않았다면 데미지가 크게 누적될 수 있어.
+          <b>공부 시작</b>을 눌러 회복 루프로 전환해줘.
+        </div>
+
+        <div class="offline-actions">
+          <button id="offlineConfirm" class="history-btn offline-close">
+            확인
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="shareModal" class="share-dialog">
+      <div class="modal-head">
+        <div>
+          <div class="boss-title" style="margin-bottom: 5px">
+            SHARE MY STATUS
+          </div>
+          <h2>공유</h2>
+        </div>
+        <button class="close" id="closeShare">닫기</button>
+      </div>
+      <div class="share-body">
+        <p class="share-intro">
+          현재 순공시간과 멘탈 상태를 1080×1080 이미지 카드로 만들었어.
+          모바일에서는 바로 공유할 수 있고, PC에서는 이미지로 저장할 수도 있어.
+        </p>
+
+        <div class="share-period-control">
+          <label for="shareTrendDays">멘탈 변화 그래프 기간</label>
+          <div class="share-period-input-wrap">
+            <input
+              id="shareTrendDays"
+              type="number"
+              min="2"
+              max="90"
+              step="1"
+              value="7"
+              inputmode="numeric"
+            />
+            <span>일</span>
+          </div>
+        </div>
+
+        <div class="share-preview-shell">
+          <canvas
+            id="shareCanvas"
+            width="1080"
+            height="1080"
+            aria-label="Menhera's StudyLog 현재 상태 공유 카드"
+          ></canvas>
+        </div>
+        <div class="share-actions">
+          <button
+            id="shareNativeBtn"
+            class="share-action-btn primary-share"
+            type="button"
+          >
+            공유하기
+          </button>
+          <button id="shareDownloadBtn" class="share-action-btn" type="button">
+            이미지 저장
+          </button>
+        </div>
+        <div id="shareNote" class="share-note"></div>
+      </div>
+    </dialog>
+
+    <dialog id="patchModal" class="patch-dialog">
+      <div class="modal-head">
+        <div>
+          <div class="boss-title" style="margin-bottom: 5px">PATCH NOTES</div>
+          <h2>패치내역</h2>
+        </div>
+        <button class="close" id="closePatch">닫기</button>
+      </div>
+
+      <div class="patch-body">
+        <div class="patch-list">
+          <section class="patch-card">
+            <div class="patch-version">v1.0.1</div>
+
+            <div class="patch-meta">
+              <span class="patch-label">반영시간</span>
+              <time datetime="2026-09-08T17:40:00+09:00">
+                2026.09.08 17:35 KST
+              </time>
+            </div>
+
+            <p class="patch-content">
+              <span class="patch-label">패치내용</span>
+              <br />
+              • 순공 데이터 추출, 덮어쓰기 기능 추가<br />
+              • 공유 이미지에 멘탈 변화 추이 그래프 추가<br />
+              • 순공 기록 초기화 작동 오류 수정
+            </p>
+          </section>
+          <section class="patch-card">
+            <div class="patch-version">v1.0.0</div>
+            <div class="patch-meta">
+              <span class="patch-label">반영시간</span>
+              <time datetime="2026-09-08T16:30:00+09:00"
+                >2026.09.08 16:30 KST</time
+              >
+            </div>
+            <p class="patch-content">
+              <span class="patch-label">패치내용</span>
+              베타 런칭
+            </p>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="helpModal" class="help-dialog">
+      <div class="modal-head">
+        <div>
+          <div class="boss-title" style="margin-bottom: 5px">QUICK GUIDE</div>
+          <h2>Menhera's StudyLog 도움말</h2>
+        </div>
+        <button class="close" id="closeHelp">닫기</button>
+      </div>
+      <div class="help-body">
+        <p class="help-lead">
+          <b>공부하지 않으면 멘탈 데미지가 쌓이고, 공부하면 회복됩니다.</b>
+          순공 타이머와 멘탈 관리 게임을 함께 굴린다고 생각하면 돼.
+        </p>
+
+        <div class="help-grid">
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/timer.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />순공 시작 / 종료
+            </h3>
+            <p>
+              <b>공부 시작</b>을 누른 동안만 순공 시간이 기록돼. 공부 중에는
+              멘탈 데미지가 회복되고 골드를 얻을 수 있어.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/damage.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />멘탈 데미지
+            </h3>
+            <p>
+              비공부 상태에서는 데미지가 계속 증가해. 누적 데미지에 따라 멘탈
+              등급이 변하며, 공부해서 다시 낮출 수 있어.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/target.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />일일 순공 목표
+            </h3>
+            <p>
+              목표시간에 맞춰 <b>공부 중 회복 속도</b>가 자동 조정돼. 예를 들어
+              4시간 목표는 하루 20시간의 비공부 데미지를 4시간 공부로 상쇄하는
+              밸런스야.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/coin.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />골드 & 상점
+            </h3>
+            <p>
+              골드는 <b>공부 중에만</b> 획득해. 멘탈 상태에 따라 획득 속도가
+              달라지고, 모은 골드는 상점 아이템 구매에 사용할 수 있어.
+            </p>
+          </section>
+
+          <section class="help-card">
+            <h3>
+              <img
+                src="assets/ui/offline.png"
+                alt=""
+                class="ui-icon help-title-icon"
+              />접속하지 않은 시간
+            </h3>
+            <p>
+              페이지를 닫거나 다시 접속하면 공부 모드는 종료돼. 마지막 저장 이후
+              경과시간은 비공부 시간으로 계산되어 <b>방치 데미지</b>가 정산돼.
+            </p>
+          </section>
+        </div>
+
+        <div class="help-data-note">
+          <b>데이터 안내</b> · 기록은 현재 브라우저의 localStorage에 저장돼.
+          다른 기기·다른 브라우저와 자동 동기화되지 않으며, 시크릿 모드나 사이트
+          데이터 삭제 시 기록이 사라질 수 있어. 데이터 충돌 방지를 위해 같은
+          브라우저에서는 Menhera's StudyLog를 한 탭에서만 실행해.
+        </div>
+      </div>
+    </dialog>
+
+    <div id="singleTabOverlay" class="single-tab-overlay" aria-live="polite">
+      <div class="single-tab-card">
+        <div class="single-tab-icon">
+          <img
+            src="assets/ui/book.png"
+            alt=""
+            class="ui-icon single-tab-book-icon"
+          />
+        </div>
+        <h2>Menhera's StudyLog가 다른 탭에서 실행 중이야</h2>
+        <p>
+          순공시간, 데미지, 골드가 서로 덮어쓰이는 것을 막기 위해 한 번에 하나의
+          탭만 메인 실행권을 가질 수 있어.
+        </p>
+        <div class="single-tab-note">
+          기존 Menhera's StudyLog 탭을 닫으면 이 화면이 자동으로 해제돼. 비정상
+          종료된 경우에도 잠시 후 실행권을 다시 확인해.
+        </div>
+        <div class="single-tab-actions">
+          <button id="singleTabCheckBtn" type="button">다시 확인</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/canvas-grade-data.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
