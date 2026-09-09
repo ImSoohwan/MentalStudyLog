@@ -89,6 +89,10 @@
           !Array.isArray(state.dailyDamageChanges)
             ? state.dailyDamageChanges
             : {};
+        // 날짜별 최종값. 변화량에서 과거 절대값을 추정하지 않는다.
+        let dailyDamageTotals = plainNumberMap(state.dailyDamageTotals, {
+          min: 0, max: MAX_DAMAGE,
+        });
         let lastTs = Number(state.lastTs || Date.now());
         let goalHours = Math.max(
           1,
@@ -111,6 +115,7 @@
         }
 
         function recordDamageDelta(delta, key = dayKey) {
+          dailyDamageTotals[key] = damage;
           delta = Number(delta);
           if (!Number.isFinite(delta) || Math.abs(delta) < 1e-9) return;
           const current = Number(dailyDamageChanges[key]);
@@ -161,9 +166,11 @@
             result.push({
               key,
               label: key.slice(5).replace("-", "/"),
-              value: hasDamageChangeRecord(key)
-                ? Number(dailyDamageChanges[key]) || 0
-                : null,
+              value: key === todayKey()
+                ? damage
+                : Object.prototype.hasOwnProperty.call(dailyDamageTotals, key)
+                  ? dailyDamageTotals[key]
+                  : null,
             });
           }
           return result;
@@ -197,10 +204,99 @@
         // 우측 상단 유틸리티 메뉴 / 도움말
         const utilityMenuToggle = $("utilityMenuToggle");
         const utilityMenuPanel = $("utilityMenuPanel");
+        const patchUpdateNotice = $("patchUpdateNotice");
+        const themeToggle = $("themeToggle");
+        const themeToggleLabel = $("themeToggleLabel");
+        const PATCH_SEEN_KEY = "menheraStudySeenPatchV1";
+        const THEME_STORAGE_KEY = "menheraStudyThemeV1";
+        let hasUnreadPatch = false;
+
+        function getInitialTheme() {
+          try {
+            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+            if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
+          } catch {
+            // 로컬 저장소를 사용할 수 없는 환경에서는 시스템 설정을 따른다.
+          }
+
+          return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+
+        function applyTheme(theme, save = true) {
+          const isDark = theme === "dark";
+          document.body.dataset.theme = isDark ? "dark" : "light";
+          themeToggle?.setAttribute("aria-pressed", String(isDark));
+          if (themeToggleLabel) {
+            themeToggleLabel.textContent = isDark
+              ? "라이트모드 켜기"
+              : "다크모드 켜기";
+          }
+
+          if (save) {
+            try {
+              localStorage.setItem(THEME_STORAGE_KEY, isDark ? "dark" : "light");
+            } catch {
+              // 테마 전환 자체는 저장소 없이도 동작한다.
+            }
+          }
+        }
+
+        function initializeTheme() {
+          applyTheme(getInitialTheme(), false);
+        }
+
+        function latestPatchFingerprint() {
+          const latestPatch = document.querySelector(".patch-list .patch-card");
+          if (!latestPatch) return "";
+
+          const version = latestPatch.querySelector(".patch-version")?.textContent || "";
+          const time = latestPatch.querySelector("time")?.getAttribute("datetime") || "";
+          const content = latestPatch.textContent || "";
+          return [version, time, content]
+            .map((value) => value.replace(/\s+/g, " ").trim())
+            .join("|");
+        }
+
+        function updatePatchNotice() {
+          patchUpdateNotice.hidden =
+            !hasUnreadPatch || utilityMenuPanel.classList.contains("open");
+        }
+
+        function markLatestPatchAsSeen() {
+          const latestPatch = latestPatchFingerprint();
+          if (!latestPatch) return;
+          try {
+            localStorage.setItem(PATCH_SEEN_KEY, latestPatch);
+            hasUnreadPatch = false;
+            updatePatchNotice();
+          } catch {
+            // localStorage를 쓸 수 없는 환경에서는 알림을 표시하지 않는다.
+          }
+        }
+
+        function initializePatchNotice() {
+          const latestPatch = latestPatchFingerprint();
+          if (!latestPatch) return;
+          try {
+            const seenPatch = localStorage.getItem(PATCH_SEEN_KEY);
+            if (!seenPatch) {
+              // 기능이 처음 배포된 날에는 기존 패치노트를 새 알림으로 취급하지 않는다.
+              localStorage.setItem(PATCH_SEEN_KEY, latestPatch);
+              return;
+            }
+            hasUnreadPatch = seenPatch !== latestPatch;
+            updatePatchNotice();
+          } catch {
+            // localStorage를 쓸 수 없는 환경에서는 알림을 표시하지 않는다.
+          }
+        }
 
         function setUtilityMenu(open) {
           utilityMenuPanel.classList.toggle("open", open);
           utilityMenuToggle.setAttribute("aria-expanded", String(open));
+          updatePatchNotice();
         }
 
         utilityMenuToggle.addEventListener("click", (e) => {
@@ -208,11 +304,22 @@
           setUtilityMenu(!utilityMenuPanel.classList.contains("open"));
         });
 
+        themeToggle?.addEventListener("click", () => {
+          applyTheme(document.body.dataset.theme === "dark" ? "light" : "dark");
+          setUtilityMenu(false);
+        });
+
         utilityMenuPanel.addEventListener("click", (e) => e.stopPropagation());
         document.addEventListener("click", () => setUtilityMenu(false));
 
         $("patchOpen").addEventListener("click", () => {
           setUtilityMenu(false);
+          markLatestPatchAsSeen();
+          $("patchModal").showModal();
+        });
+
+        patchUpdateNotice.addEventListener("click", () => {
+          markLatestPatchAsSeen();
           $("patchModal").showModal();
         });
 
@@ -222,6 +329,9 @@
         $("patchModal").addEventListener("click", (e) => {
           if (e.target === $("patchModal")) $("patchModal").close();
         });
+
+        initializeTheme();
+        initializePatchNotice();
 
         $("helpOpen").addEventListener("click", () => {
           setUtilityMenu(false);
@@ -272,6 +382,7 @@
         }
 
         async function drawShareCard() {
+          applyElapsed();
           const canvas = $("shareCanvas");
           const ctx = canvas.getContext("2d");
           const g = currentGrade();
@@ -428,7 +539,7 @@
           ctx.fillStyle = "#777168";
           ctx.font = '900 22px "Noto Sans KR", Arial, sans-serif';
           ctx.fillText(
-            `멘탈 변화 추이 · 최근 ${trendDays}일`,
+            `멘탈 데미지 추이 · 최근 ${trendDays}일`,
             graphX,
             graphY - 12,
           );
@@ -443,12 +554,12 @@
           const knownValues = trend
             .map((p) => p.value)
             .filter((v) => v !== null && Number.isFinite(v));
-          const absMax = Math.max(1, ...knownValues.map((v) => Math.abs(v)));
-          const innerLeft = graphX + 22;
+          // 절대 데미지 축은 항상 0~MAX_DAMAGE로 고정한다.
+          const innerLeft = graphX + 88;
           const innerRight = graphX + graphW - 22;
           const innerTop = graphY + 16;
           const innerBottom = graphY + graphH - 25;
-          const zeroY = (innerTop + innerBottom) / 2;
+          const zeroY = innerBottom;
 
           ctx.save();
           ctx.setLineDash([5, 5]);
@@ -459,6 +570,12 @@
           ctx.lineTo(innerRight, zeroY);
           ctx.stroke();
           ctx.restore();
+          ctx.fillStyle = "#817b72";
+          ctx.font = '700 15px "Courier New", monospace';
+          ctx.textAlign = "right";
+          ctx.fillText(MAX_DAMAGE.toLocaleString("ko-KR"), innerLeft - 10, innerTop + 5);
+          ctx.fillText("0", innerLeft - 10, innerBottom + 5);
+          ctx.textAlign = "left";
 
           const pointX = (i) =>
             trend.length <= 1
@@ -466,7 +583,7 @@
               : innerLeft + ((innerRight - innerLeft) * i) / (trend.length - 1);
           const pointY = (value) =>
             zeroY -
-            (Number(value) / absMax) * ((innerBottom - innerTop) / 2 - 5);
+            (Number(value) / MAX_DAMAGE) * (innerBottom - innerTop);
 
           let prevKnown = null;
           for (let i = 0; i < trend.length; i++) {
@@ -487,8 +604,7 @@
               ctx.stroke();
             }
 
-            ctx.fillStyle =
-              p.value > 0 ? "#a44e59" : p.value < 0 ? "#4f7562" : "#777168";
+            ctx.fillStyle = gradeFor(p.value).color;
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, Math.PI * 2);
             ctx.fill();
@@ -513,7 +629,7 @@
             ctx.font = '700 18px "Noto Sans KR", Arial, sans-serif';
             ctx.textAlign = "center";
             ctx.fillText(
-              "이 기간의 멘탈 변화 기록이 아직 없어",
+              "이 기간의 멘탈 데미지 기록이 아직 없어",
               graphX + graphW / 2,
               zeroY + 6,
             );
@@ -789,8 +905,8 @@
           const d = new Date();
           return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         }
-        function rollover() {
-          const now = todayKey();
+        function rollover(at = Date.now()) {
+          const now = localDateKey(new Date(at));
           if (now !== dayKey) {
             records[dayKey] = Math.max(
               Number(records[dayKey] || 0),
@@ -913,28 +1029,32 @@
           return earnGold ? earned : 0;
         }
 
+        // 자정과 부스터 만료 시점에서 구간을 나눠 각 날짜의 최종값을 저장한다.
+        function advanceTimeRange(start, end, isStudying) {
+          let cursor = start;
+          while (cursor < end) {
+            rollover(cursor);
+            const midnight = new Date(cursor);
+            midnight.setHours(24, 0, 0, 0);
+            let until = Math.min(end, midnight.getTime());
+            if (isStudying && recoveryBoostUntil > cursor) {
+              until = Math.min(until, recoveryBoostUntil);
+            }
+            const seconds = (until - cursor) / 1000;
+            const rate = isStudying
+              ? studyRate() * (isRecoveryBoostActive(cursor) ? 2 : 1)
+              : IDLE_RATE;
+            advanceProgress(seconds, rate, isStudying);
+            if (isStudying) todaySeconds += seconds;
+            cursor = until;
+          }
+          rollover(end);
+          dailyDamageTotals[dayKey] = damage;
+        }
+
         function applyElapsed() {
           const now = Date.now();
-          const elapsed = Math.max(0, (now - lastTs) / 1000);
-          rollover();
-
-          if (studying && elapsed > 0) {
-            // 부스터 만료 시점이 경과 구간 안에 있으면 정확히 둘로 나눠 계산한다.
-            if (recoveryBoostUntil > lastTs && recoveryBoostUntil < now) {
-              const boostedSeconds = (recoveryBoostUntil - lastTs) / 1000;
-              const normalSeconds = (now - recoveryBoostUntil) / 1000;
-              advanceProgress(boostedSeconds, studyRate() * 2, true);
-              advanceProgress(normalSeconds, studyRate(), true);
-            } else {
-              const rate = isRecoveryBoostActive(lastTs)
-                ? studyRate() * 2
-                : studyRate();
-              advanceProgress(elapsed, rate, true);
-            }
-            todaySeconds += elapsed;
-          } else if (elapsed > 0) {
-            advanceProgress(elapsed, IDLE_RATE, false);
-          }
+          advanceTimeRange(Math.min(lastTs, now), now, studying);
           lastTs = now;
         }
         function settleOffline(seconds, showPopup = true) {
@@ -942,8 +1062,8 @@
           const before = damage;
           const beforeGrade = gradeFor(before);
           studying = false; // 오프라인에서는 순공 모드가 절대 유지되지 않음
-          rollover();
-          advanceProgress(seconds, IDLE_RATE, false);
+          const now = Date.now();
+          advanceTimeRange(now - seconds * 1000, now, false);
           const applied = damage - before;
           const afterGrade = gradeFor(damage);
           lastTs = Date.now();
@@ -1038,6 +1158,7 @@
           renderHistory();
         }
         function save() {
+          dailyDamageTotals[dayKey] = damage;
           records[dayKey] = Math.max(
             Number(records[dayKey] || 0),
             todaySeconds,
@@ -1051,6 +1172,7 @@
               todaySeconds,
               records,
               dailyDamageChanges,
+              dailyDamageTotals,
               lastTs,
               goalHours,
               gold,
@@ -1085,7 +1207,7 @@
         }
 
         const STUDY_BACKUP_FORMAT = "menheras-studylog-backup";
-        const STUDY_BACKUP_VERSION = 1;
+        const STUDY_BACKUP_VERSION = 2;
 
         function plainNumberMap(
           value,
@@ -1097,6 +1219,7 @@
           const result = {};
           for (const [key, raw] of Object.entries(value)) {
             if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+            if (raw === null || raw === "" || typeof raw === "boolean") continue;
             const num = Number(raw);
             if (!Number.isFinite(num)) continue;
             result[key] = Math.max(min, Math.min(max, num));
@@ -1118,6 +1241,7 @@
               todaySeconds,
               records: { ...records },
               dailyDamageChanges: { ...dailyDamageChanges },
+              dailyDamageTotals: { ...dailyDamageTotals },
               goalHours,
               gold,
               recoveryBoostUntil,
@@ -1185,6 +1309,7 @@
             todaySeconds: importedTodaySeconds,
             records: importedRecords,
             dailyDamageChanges: importedDamageChanges,
+            dailyDamageTotals: plainNumberMap(source.dailyDamageTotals, { min: 0, max: MAX_DAMAGE }),
             goalHours: Math.max(
               1,
               Math.min(
@@ -1226,6 +1351,7 @@
           todaySeconds = imported.todaySeconds;
           records = { ...imported.records };
           dailyDamageChanges = { ...imported.dailyDamageChanges };
+          dailyDamageTotals = { ...imported.dailyDamageTotals };
           goalHours = imported.goalHours;
           gold = imported.gold;
           recoveryBoostUntil = imported.recoveryBoostUntil;
@@ -1359,6 +1485,7 @@
               todaySeconds = 0;
               records = {};
               dailyDamageChanges = { [dayKey]: 0 };
+              dailyDamageTotals = { [dayKey]: 0 };
               lastTs = Date.now();
               goalHours = DEFAULT_GOAL_HOURS;
               gold = 0;
@@ -1723,31 +1850,20 @@
           );
           $("adminDummyDamageDays").value = String(days);
 
-          // 재현 가능한 파형을 사용해 증가/감소가 모두 보이게 만든다.
-          for (let i = days - 1; i >= 0; i--) {
-            const key = dateKeyDaysAgo(i);
+          // 과거 절대 데미지 샘플만 생성한다. 오늘은 실제 현재값을 유지한다.
+          for (let i = days - 1; i > 0; i--) {
             const index = days - 1 - i;
-            let value = Math.round(
-              Math.sin(index * 1.18) * 7200 + Math.cos(index * 0.53) * 2800,
+            dailyDamageTotals[dateKeyDaysAgo(i)] = Math.round(
+              50000 + Math.sin(index * 1.18) * 28000 + Math.cos(index * 0.53) * 12000,
             );
-
-            // 0만 계속 나오는 구간을 피하고 시각적 변화가 확실하도록 보정.
-            if (Math.abs(value) < 700) {
-              value = index % 2 === 0 ? 1200 : -1200;
-            }
-            dailyDamageChanges[key] = value;
           }
-
-          // 오늘 데이터도 즉시 기록된 것으로 보장.
-          if (!hasDamageChangeRecord(dayKey)) {
-            dailyDamageChanges[dayKey] = 0;
-          }
+          dailyDamageTotals[dayKey] = damage;
 
           save();
           render();
           syncAdminFields();
           $("adminDummyDamageMsg").textContent =
-            `최근 ${days}일의 더미 멘탈 변화 데이터를 생성했어. 공유 카드에서 바로 테스트할 수 있어.`;
+            `최근 ${days}일의 더미 멘탈 데미지 데이터를 생성했어. 공유 카드에서 바로 테스트할 수 있어.`;
         });
 
         document.querySelectorAll("[data-offline]").forEach((b) =>
@@ -1773,7 +1889,10 @@
         const offlineElapsed = Math.max(0, (startupNow - lastTs) / 1000);
         studying = false;
         if (offlineElapsed >= 1) settleOffline(offlineElapsed, true);
-        else lastTs = startupNow;
+        else {
+          advanceTimeRange(Math.min(lastTs, startupNow), startupNow, false);
+          lastTs = startupNow;
+        }
         render();
         save();
 
@@ -1824,4 +1943,3 @@
           }
         });
       })();
-    
