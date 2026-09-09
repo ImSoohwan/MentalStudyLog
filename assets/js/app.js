@@ -205,47 +205,8 @@
         const utilityMenuToggle = $("utilityMenuToggle");
         const utilityMenuPanel = $("utilityMenuPanel");
         const patchUpdateNotice = $("patchUpdateNotice");
-        const themeToggle = $("themeToggle");
-        const themeToggleLabel = $("themeToggleLabel");
         const PATCH_SEEN_KEY = "menheraStudySeenPatchV1";
-        const THEME_STORAGE_KEY = "menheraStudyThemeV1";
         let hasUnreadPatch = false;
-
-        function getInitialTheme() {
-          try {
-            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-            if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
-          } catch {
-            // 로컬 저장소를 사용할 수 없는 환경에서는 시스템 설정을 따른다.
-          }
-
-          return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-        }
-
-        function applyTheme(theme, save = true) {
-          const isDark = theme === "dark";
-          document.body.dataset.theme = isDark ? "dark" : "light";
-          themeToggle?.setAttribute("aria-pressed", String(isDark));
-          if (themeToggleLabel) {
-            themeToggleLabel.textContent = isDark
-              ? "라이트모드 켜기"
-              : "다크모드 켜기";
-          }
-
-          if (save) {
-            try {
-              localStorage.setItem(THEME_STORAGE_KEY, isDark ? "dark" : "light");
-            } catch {
-              // 테마 전환 자체는 저장소 없이도 동작한다.
-            }
-          }
-        }
-
-        function initializeTheme() {
-          applyTheme(getInitialTheme(), false);
-        }
 
         function latestPatchFingerprint() {
           const latestPatch = document.querySelector(".patch-list .patch-card");
@@ -304,11 +265,6 @@
           setUtilityMenu(!utilityMenuPanel.classList.contains("open"));
         });
 
-        themeToggle?.addEventListener("click", () => {
-          applyTheme(document.body.dataset.theme === "dark" ? "light" : "dark");
-          setUtilityMenu(false);
-        });
-
         utilityMenuPanel.addEventListener("click", (e) => e.stopPropagation());
         document.addEventListener("click", () => setUtilityMenu(false));
 
@@ -330,7 +286,6 @@
           if (e.target === $("patchModal")) $("patchModal").close();
         });
 
-        initializeTheme();
         initializePatchNotice();
 
         $("helpOpen").addEventListener("click", () => {
